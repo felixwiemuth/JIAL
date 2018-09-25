@@ -1,5 +1,5 @@
 {
-module Nested where
+module Main (main) where
 
 import Control.Monad
 }
@@ -78,5 +78,9 @@ scanner str =
           else do toks <- loop; return (tok:toks)
   in runAlex str loop
 
-main = print $ scanner "This /* is */ a /* nested /* comment */ foo */ test"
+-- main = print $ scanner "This /* is */ a /* nested /* comment */ foo */ test"
+
+main = do
+  s <- getContents
+  print (scanner s)
 }
