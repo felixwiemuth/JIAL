@@ -1,5 +1,5 @@
 {
-module Main (main) where
+module Lexer (Token(..), scanner, main) where
 
 import Control.Monad
 }
@@ -26,7 +26,8 @@ state :-
 <state_comment> \n           { skip }
 
 {
-data Token = EOF | ID String
+data Token = EOF
+           | ID String
   deriving (Show, Eq)
 
 alexEOF :: Alex Token
