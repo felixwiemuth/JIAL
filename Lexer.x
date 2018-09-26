@@ -19,11 +19,11 @@ state :-
 
 <0>             @identifier  { getVariable }
 <0>             $whitespace+ ;
-<0>             "/*"         { enterNewComment `andBegin` state_comment }
-<state_comment> "/*"         { embedComment }
-<state_comment> "*/"         { unembedComment }
-<state_comment> .            ;
-<state_comment> \n           { skip }
+<0>             "/*"         { enterNewComment `andBegin` cmt }
+<cmt> "/*"         { embedComment }
+<cmt> "*/"         { unembedComment }
+<cmt> .            ;
+<cmt> \n           { skip }
 
 {
 data Token = EOF
