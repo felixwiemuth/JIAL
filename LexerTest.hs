@@ -14,12 +14,22 @@ tl :: String -> String -> [Token] -> Test
 tl name input expectedResult =
   mkLexTestCase name (scanner input) (\res -> assertEqual name expectedResult res)
 
+-- Token list constructors
+mkStr :: String -> [Token]
+mkStr = map StringChar
 
 main = runTestTT testlist
 
 testlist :: Test
 testlist = TestList [
-  tl "A1" "a" [ID "a"],
-  tl "A2" "ab" [ID "ab"],
-  tl "A3" "a b" [ID "a", ID "b"]
+    tl "A1" "a" [ID "a"]
+  , tl "A2" "ab" [ID "ab"]
+  , tl "A3" "a b" [ID "a", ID "b"]
+  , tl "S1" "\"" [BeginString]
+  , tl "S2" "\"ok" [BeginString, StringChar 'o', StringChar 'k']
+  , tl "S3" "\"ok\"" [BeginString, StringChar 'o', StringChar 'k', EndString]
+  , tl "S4" "\"ok\"" [BeginString, StringChar 'o', StringChar 'k', EndString]
+  , tl "S5" "\"Hello World String\"" $ [BeginString] ++ mkStr "Hello World String" ++ [EndString]
+  , tl "S6" "/* commented \"String\" */" []
+  , tl "S6" "/* commented \"String\" */ and \"string\" " $ mkStr "string"
   ]

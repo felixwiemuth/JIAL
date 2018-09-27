@@ -1,5 +1,5 @@
 {
-module Lexer (Token(..), scanner, main) where
+module Lexer (Token(..), scanner) where
 
 import Control.Monad
 }
@@ -15,19 +15,31 @@ $ident      = [$letter $digit _]                             -- identifier chara
 @number     = [$digit]+
 @identifier = $alpha($alpha|_|$digit)*
 
+
+-- Comments and strings
+-- In normal code, inside a string everything is a normal character except for the end-string control character
+-- In a comment, everything is a normal character except for end of comment (*/ or linebreak) (strings have no effect)
+
+
 state :-
 
 <0>             @identifier  { getVariable }
 <0>             $whitespace+ ;
-<0>             "/*"         { enterNewComment `andBegin` cmt }
+<0>   \"           { mkTs BeginString `andBegin` str }
+<0>   "/*"         { enterNewComment `andBegin` cmt }
 <cmt> "/*"         { embedComment }
 <cmt> "*/"         { unembedComment }
 <cmt> .            ;
 <cmt> \n           { skip }
+<str> [^\"]        { getStringChar }
+<str> \"           { mkTs EndString `andBegin` 0 }
 
 {
 data Token = EOF
+           | BeginString
+           | EndString
            | ID String
+           | StringChar Char
   deriving (Show, Eq)
 
 alexEOF :: Alex Token
@@ -39,6 +51,11 @@ data AlexUserState = AlexUserState
                        lexerCommentDepth  :: Int
                    }
 
+-- Make a token without using input ("simple token")
+-- mkTs 
+mkTs t = token (\ _ _ -> t)
+
+       
 alexInitUserState :: AlexUserState
 alexInitUserState = AlexUserState 0
 
@@ -47,6 +64,10 @@ getLexerCommentDepth = Alex $ \s@AlexState{alex_ust=ust} -> Right (s, lexerComme
 
 setLexerCommentDepth :: Int -> Alex ()
 setLexerCommentDepth ss = Alex $ \s -> Right (s{alex_ust=(alex_ust s){lexerCommentDepth=ss}}, ())
+
+
+beginString input len =
+    do skip input len
 
 enterNewComment input len =
     do setLexerCommentDepth 1
@@ -70,6 +91,9 @@ getVariable (p, _, _, input) len = return $ ID s
   where
     s = take len input
 
+getStringChar (p, _, _, input) len = return $ StringChar c
+  where c = input!!0
+
 scanner :: String -> Either String [Token]
 scanner str = 
   let loop = do
@@ -83,5 +107,8 @@ scanner str =
 
 main = do
   s <- getContents
-  print (scanner s)
+  print $ "Input:  " ++ s
+  print $ "Tokens: " ++ (show (scanner s))
+
+
 }
