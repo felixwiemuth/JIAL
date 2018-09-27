@@ -1,3 +1,5 @@
+-- Embedded block comment lexing from https://stackoverflow.com/a/28142583/
+
 {
 module Lexer (Token(..), scanner) where
 
@@ -14,13 +16,13 @@ $letter     = [a-zA-Z]                                       -- alphabetic chara
 $ident      = [$letter $digit _]                             -- identifier character
 
 
-$normalchar = $all # [\"] -- all but single control characters
+$normalchar = $all # [\" \{ \}] -- all but single control characters
+$endoflinecmt = [\n]
 
 @number     = [$digit]+
 @identifier = $alpha($alpha|_|$digit)*
 
-@linecmt = "//"(.)*\n
-
+@linecmt = "//"(.)*$endoflinecmt
 
 -- Comments and strings
 -- In normal code, inside a string everything is a normal character except for the end-string control character
@@ -35,6 +37,8 @@ state :-
 <0>   \"           { mkTs BeginString `andBegin` str }
 <0> @linecmt       { skip }
 <0>   "/*"         { enterNewComment `andBegin` cmt }
+<0>   \{           { beginBlock }
+<0>   \}           { endBlock }
 <cmt> "/*"         { embedComment }
 <cmt> "*/"         { unembedComment }
 <cmt> .            ;
@@ -47,7 +51,8 @@ data Token = EOF
            | NormalChar Char -- any character
            | BeginString
            | EndString
-           | ID String
+           | BeginBlock Int -- block with depth (starts at 0)
+           | EndBlock Int
            | StringChar Char
   deriving (Show, Eq)
 
@@ -57,7 +62,8 @@ alexEOF = return EOF
 data AlexUserState = AlexUserState
                    {
                      -- used by the lexer phase
-                       lexerCommentDepth  :: Int
+                     lexerCommentDepth  :: Int
+                   , lexerBlockDepth :: Int
                    }
 
 -- Make a token without using input ("simple token")
@@ -65,7 +71,7 @@ data AlexUserState = AlexUserState
 mkTs t = token (\ _ _ -> t)
 
 alexInitUserState :: AlexUserState
-alexInitUserState = AlexUserState 0
+alexInitUserState = AlexUserState 0 0
 
 getLexerCommentDepth :: Alex Int
 getLexerCommentDepth = Alex $ \s@AlexState{alex_ust=ust} -> Right (s, lexerCommentDepth ust)
@@ -73,9 +79,24 @@ getLexerCommentDepth = Alex $ \s@AlexState{alex_ust=ust} -> Right (s, lexerComme
 setLexerCommentDepth :: Int -> Alex ()
 setLexerCommentDepth ss = Alex $ \s -> Right (s{alex_ust=(alex_ust s){lexerCommentDepth=ss}}, ())
 
+getLexerBlockDepth :: Alex Int
+getLexerBlockDepth = Alex $ \s@AlexState{alex_ust=ust} -> Right (s, lexerBlockDepth ust)
+
+setLexerBlockDepth :: Int -> Alex ()
+setLexerBlockDepth ss = Alex $ \s -> Right (s{alex_ust=(alex_ust s){lexerBlockDepth=ss}}, ())
 
 beginString input len =
     do skip input len
+
+beginBlock input len =
+    do d <- getLexerBlockDepth
+       setLexerBlockDepth (d + 1)
+       return $ BeginBlock d
+
+endBlock input len =
+    do d <- getLexerBlockDepth
+       setLexerBlockDepth (d - 1)
+       return $ EndBlock (d - 1)
 
 enterNewComment input len =
     do setLexerCommentDepth 1
@@ -99,10 +120,6 @@ state_initial = 0
 getNormalChar (p, _, _, input) len = return $ NormalChar c
   where
     c = input!!0
-
-getVariable (p, _, _, input) len = return $ ID s
-  where
-    s = take len input
 
 getStringChar (p, _, _, input) len = return $ StringChar c
   where
