@@ -6,14 +6,19 @@ import Control.Monad
 
 %wrapper "monadUserState"
 
+$all        = [\x00-\x10ffff]
 $whitespace = [\ \t\b]
 $digit      = 0-9                                            -- digits
 $alpha      = [A-Za-z]
 $letter     = [a-zA-Z]                                       -- alphabetic characters
 $ident      = [$letter $digit _]                             -- identifier character
 
+
+$normalchar = $all # [\"] -- all but single control characters
+
 @number     = [$digit]+
 @identifier = $alpha($alpha|_|$digit)*
+
 
 
 -- Comments and strings
@@ -21,10 +26,11 @@ $ident      = [$letter $digit _]                             -- identifier chara
 -- In a comment, everything is a normal character except for end of comment (*/ or linebreak) (strings have no effect)
 
 
+
 state :-
 
-<0>             @identifier  { getVariable }
-<0>             $whitespace+ ;
+<0>  $normalchar  { getNormalChar }
+-- <0>             $whitespace+ ;
 <0>   \"           { mkTs BeginString `andBegin` str }
 <0>   "/*"         { enterNewComment `andBegin` cmt }
 <cmt> "/*"         { embedComment }
@@ -36,6 +42,7 @@ state :-
 
 {
 data Token = EOF
+           | NormalChar Char -- any character
            | BeginString
            | EndString
            | ID String
@@ -52,10 +59,9 @@ data AlexUserState = AlexUserState
                    }
 
 -- Make a token without using input ("simple token")
--- mkTs 
+-- mkTs
 mkTs t = token (\ _ _ -> t)
 
-       
 alexInitUserState :: AlexUserState
 alexInitUserState = AlexUserState 0
 
@@ -87,12 +93,18 @@ unembedComment input len =
 state_initial :: Int
 state_initial = 0
 
+
+getNormalChar (p, _, _, input) len = return $ NormalChar c
+  where
+    c = input!!0
+
 getVariable (p, _, _, input) len = return $ ID s
   where
     s = take len input
 
 getStringChar (p, _, _, input) len = return $ StringChar c
-  where c = input!!0
+  where
+    c = input!!0
 
 scanner :: String -> Either String [Token]
 scanner str = 
