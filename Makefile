@@ -1,5 +1,8 @@
 cmd := ghc -dynamic
 
+main: Lexer.hs
+	$(cmd) Main.hs
+
 lexer: Lexer.hs
 	$(cmd) Lexer.hs
 
