@@ -19,6 +19,7 @@ $normalchar = $all # [\"] -- all but single control characters
 @number     = [$digit]+
 @identifier = $alpha($alpha|_|$digit)*
 
+@linecmt = "//"(.)*\n
 
 
 -- Comments and strings
@@ -32,6 +33,7 @@ state :-
 <0>  $normalchar  { getNormalChar }
 -- <0>             $whitespace+ ;
 <0>   \"           { mkTs BeginString `andBegin` str }
+<0> @linecmt       { skip }
 <0>   "/*"         { enterNewComment `andBegin` cmt }
 <cmt> "/*"         { embedComment }
 <cmt> "*/"         { unembedComment }

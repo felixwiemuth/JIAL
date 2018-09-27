@@ -38,4 +38,8 @@ testlist = TestList [
   , tl "S5" "\"Hello World String\"" $ mkStr "Hello World String"
   , tl "S6" "/* commented \"String\" */" []
   , tl "S7" "/* commented \"String\" */ and \"string\" " $ mkN " and " ++ mkStr "string" ++ mkN " "
+  , tl "C1" "// Line comment\n" []
+  , tl "C2" " // Line comment\n" $ mkN " "
+  , tl "C3" "sth., then: // Line comment\n" $ mkN "sth., then: "
+  , tl "C4" "// Line comment with stuff inside /* dsd */ \" \" //\n" $ []
   ]
