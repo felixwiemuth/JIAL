@@ -1,6 +1,6 @@
 cmd := ghc -dynamic
 
-main: Lexer.hs
+main: Lexer.hs Parser.hs
 	$(cmd) Main.hs
 
 lexer: Lexer.hs
@@ -11,3 +11,9 @@ test: LexerTest.hs Lexer.hs
 
 Lexer.hs: Lexer.x
 	alex Lexer.x
+
+Parser.hs: Parser.y
+	happy Parser.y
+
+clean:
+	rm Main Lexer.hs Parser.hs *.o *.hi
