@@ -1,5 +1,5 @@
 {
-module Parser where
+  module Parser (Task, TaskElem(..), parse) where
 import qualified Lexer as L
 }
 
@@ -16,16 +16,24 @@ stringChar { L.StringChar $$ }
 
 %%
 
+Task :: { [TaskElem] }
 Task : TaskList { reverse $1 }
 
 TaskList : {- empty -} { [] }
   | TaskList TaskElem { $2:$1  }
 
 TaskElem : beginString StringCharList endString { TString $ reverse $2 }
+         | NormalCharList { NormalCharBlock $ reverse $1 }
 
 StringCharList :: { String }
 StringCharList : {- empty -} { [] }
-  | StringCharList stringChar { $2:$1 }
+               | StringCharList stringChar { $2:$1 }
+
+
+NormalCharList :: { String }
+NormalCharList : normalChar { [$1] }
+               | NormalCharList normalChar { $2:$1 }
+
 
 {
 parseError :: [L.Token] -> a
@@ -33,11 +41,11 @@ parseError tokens = error $ "Parse error on tokens " ++ show tokens
 
 data Task
   = TaskList [TaskElem]
-  deriving (Show)
+  deriving (Eq, Show)
 
 data TaskElem
-  = NormalChar Char
+  = NormalCharBlock String
   | TString String
-  deriving (Show)
+  deriving (Eq, Show)
 
 }

@@ -1,4 +1,4 @@
-module LexerTest (main) where
+module LexerTest() where
 
 import Lexer (Token(..), scanner)
 import Test.HUnit

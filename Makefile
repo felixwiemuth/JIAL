@@ -6,8 +6,9 @@ main: Lexer.hs Parser.hs
 lexer: Lexer.hs
 	$(cmd) Lexer.hs
 
-test: LexerTest.hs Lexer.hs
+test: LexerTest.hs Lexer.hs ParserTest.hs Parser.hs
 	runhaskell LexerTest
+	runhaskell ParserTest
 
 Lexer.hs: Lexer.x
 	alex Lexer.x
