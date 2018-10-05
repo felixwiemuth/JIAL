@@ -30,6 +30,8 @@ mkStr s = [BeginString] ++ map StringChar s ++ [EndString]
 mkN :: String -> [Token]
 mkN = map NormalChar
 
+-- Single space
+sp = Space " "
 
 main = runTestTT testlist
 
@@ -38,6 +40,13 @@ testlist = TestList [
     tl "A1" "a" $ mkN "a"
   , tl "A2" "ab" $ mkN "ab"
   , tl "A3" "a b" $ mkN "a b"
+  , tl "A4a" "(" $ mkN "("
+  , tl "A4b" "$" $ mkN "$"
+  , tl "A4c" "><,." $ mkN "><,."
+  , tl "Sep1a" ";" $ [StmntSep]
+  , tl "Sep1b" ";;" $ [StmntSep, StmntSep]
+  , tl "Sep1c" " ; ;" $ mkN " " ++ [StmntSep] ++ mkN " " ++ [StmntSep]
+  , tl "Sep2" "a;b" $ mkN "a" ++ [StmntSep] ++ mkN "b"
   , tl "S1" "\"" [BeginString]
   , tl "S2" "\"ok" [BeginString, StringChar 'o', StringChar 'k']
   , tl "S3" "\"ok\"" [BeginString, StringChar 'o', StringChar 'k', EndString]
@@ -58,4 +67,9 @@ testlist = TestList [
   , tl "B3a" (cmt "{") []
   , tl "B3b" (cmt "}") []
   , tl "B3c" (cmt "{}") []
+  , tl "When1" "input when true" $ [BeginInput, sp, BeginWhen] ++ mkN " true"
+  , tl "Iap1" "input msgX(int x) when x > 0 {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", EndParamList, sp, BeginWhen] ++ mkN " x > 0 " ++ [BeginBlock 0, EndBlock 0]
+  , tl "Iap2" "input msgX(int x,  String myS) when x > 0 && s=\"s\" {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", ParamSep, Space "  ", Id "String", sp, Id "myS", EndParamList, sp, BeginWhen] ++ mkN " x > 0 && s=\"s\" " ++ [BeginBlock 0, EndBlock 0]
+  -- TODO more tests with different spacing etc.
+  -- TODO test Send, Reply
   ]

@@ -16,11 +16,13 @@ $letter     = [a-zA-Z]                                       -- alphabetic chara
 $ident      = [$letter $digit _]                             -- identifier character
 
 
-$normalchar = $all # [\" \{ \}] -- all but single control characters
+$normalchar = $all # [\" \{ \} \;] -- all but single control characters
+$whenchar = $all # [\{]
 $endoflinecmt = [\n]
 
 @number     = [$digit]+
 @identifier = $alpha($alpha|_|$digit)*
+@space      = [$whitespace]+
 
 @linecmt = "//"(.)*$endoflinecmt
 
@@ -32,28 +34,51 @@ $endoflinecmt = [\n]
 
 state :-
 
-<0>  $normalchar  { getNormalChar }
+<0>  $normalchar   { mkTchar NormalChar }
 -- <0>             $whitespace+ ;
+<0>   \;           { mkTs StmntSep }
 <0>   \"           { mkTs BeginString `andBegin` str }
-<0> @linecmt       { skip }
+<0>   @linecmt     { skip }
 <0>   "/*"         { enterNewComment `andBegin` cmt }
 <0>   \{           { beginBlock }
 <0>   \}           { endBlock }
+<0>   "input"      { mkTs BeginInput `andBegin` inp } -- after "input" keyword switch to "input mode"
+<0>   "send"       { mkTs Send }
+<0>   "reply"       { mkTs Reply }
 <cmt> "/*"         { embedComment }
 <cmt> "*/"         { unembedComment }
 <cmt> .            ;
 <cmt> \n           { skip }
-<str> [^\"]        { getStringChar }
+<str> [^\"]        { mkTchar StringChar }
 <str> \"           { mkTs EndString `andBegin` 0 }
+-- In "input mode", ony a parameter list with whitespaces is allowed
+<inp> \(           { mkTs BeginParamList }
+<inp> \)           { mkTs EndParamList }
+<inp> \,           { mkTs ParamSep }
+<inp> "when"       { mkTs BeginWhen `andBegin` whn } -- after "when" keyword switch to "when mode"
+<inp> @space       { mkTstr Space }
+<inp> @identifier  { mkTstr Id }
+<whn> $whenchar    { mkTchar NormalChar } -- in "when mode", we take all characters until the next "{"
+<whn> \{           { beginBlock `andBegin` 0} -- the "when" part ends with a "{"
 
 {
 data Token = EOF
-           | NormalChar Char -- any character
+           | NormalChar Char -- any character (restricted in some modes)
+           | StmntSep
+           | Send
+           | Reply
            | BeginString
            | EndString
            | BeginBlock Int -- block with depth (starts at 0)
            | EndBlock Int
            | StringChar Char
+           | BeginInput
+           | BeginParamList
+           | EndParamList
+           | ParamSep
+           | Space String -- Sequence of whitespaces
+           | Id String
+           | BeginWhen -- then "when" keyword
   deriving (Show, Eq)
 
 alexEOF :: Alex Token
@@ -69,6 +94,12 @@ data AlexUserState = AlexUserState
 -- Make a token without using input ("simple token")
 -- mkTs
 mkTs t = token (\ _ _ -> t)
+
+-- Make a token that takes the matched string
+mkTstr t = \(p, _, _, input) len -> return $ t (take len input)
+
+-- Like mkTstr, just for one char
+mkTchar t = \(p, _, _, input) len -> return $ t (input!!0)
 
 alexInitUserState :: AlexUserState
 alexInitUserState = AlexUserState 0 0
@@ -116,17 +147,8 @@ unembedComment input len =
 state_initial :: Int
 state_initial = 0
 
-
-getNormalChar (p, _, _, input) len = return $ NormalChar c
-  where
-    c = input!!0
-
-getStringChar (p, _, _, input) len = return $ StringChar c
-  where
-    c = input!!0
-
 scanner :: String -> Either String [Token]
-scanner str = 
+scanner str =
   let loop = do
         tok <- alexMonadScan
         if tok == EOF
