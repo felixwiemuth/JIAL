@@ -9,7 +9,8 @@ import Control.Monad
 %wrapper "monadUserState"
 
 $all        = [\x00-\x10ffff]
-$whitespace = [\ \t\b]
+$w          = [\ \t\b]
+$wn         = [\ \t\b\n]
 $digit      = 0-9                                            -- digits
 $alpha      = [A-Za-z]
 $letter     = [a-zA-Z]                                       -- alphabetic characters
@@ -19,10 +20,11 @@ $ident      = [$letter $digit _]                             -- identifier chara
 $normalchar = $all # [\" \{ \} \;] -- all but single control characters
 $whenchar = $all # [\{]
 $endoflinecmt = [\n]
+$kp = [$wn \{] -- keyword prefix
 
 @number     = [$digit]+
 @identifier = $alpha($alpha|_|$digit)*
-@space      = [$whitespace]+
+@space      = [$wn]+  -- space including newline
 
 @linecmt = "//"(.)*$endoflinecmt
 
@@ -34,17 +36,18 @@ $endoflinecmt = [\n]
 
 state :-
 
-<0>  $normalchar   { mkTchar NormalChar }
--- <0>             $whitespace+ ;
+-- Some keywords must start a new line (input) or be preceded by some space and be followed by some space
+<0>  \n  ^ "input" / @space   { mkTs BeginInput `andBegin` inp } -- switch to "input mode"
+<0>  $kp ^ "send" / @space  { mkTs Send `andBegin` srp } -- switch to "send/reply" mode
+<0>  $wn ^ "to" / @space       { mkTs To }
+<0>  $kp ^ "reply" / @space    { mkTs Reply `andBegin` srp }
 <0>   \;           { mkTs StmntSep }
 <0>   \"           { mkTs BeginString `andBegin` str }
 <0>   @linecmt     { skip }
 <0>   "/*"         { enterNewComment `andBegin` cmt }
 <0>   \{           { beginBlock }
 <0>   \}           { endBlock }
-<0>   "input"      { mkTs BeginInput `andBegin` inp } -- after "input" keyword switch to "input mode"
-<0>   "send"       { mkTs Send }
-<0>   "reply"       { mkTs Reply }
+<0>  $normalchar   { mkTchar NormalChar }
 <cmt> "/*"         { embedComment }
 <cmt> "*/"         { unembedComment }
 <cmt> .            ;
@@ -55,17 +58,22 @@ state :-
 <inp> \(           { mkTs BeginParamList }
 <inp> \)           { mkTs EndParamList }
 <inp> \,           { mkTs ParamSep }
-<inp> "when"       { mkTs BeginWhen `andBegin` whn } -- after "when" keyword switch to "when mode"
+<inp> $wn ^ "when" / @space  { mkTs BeginWhen `andBegin` whn } -- the "input" part ends with a "when", switch to "when mode"
 <inp> @space       { mkTstr Space }
 <inp> @identifier  { mkTstr Id }
+<inp> \{           { beginBlock `andBegin` 0} -- the "input" part ends with a "{"
 <whn> $whenchar    { mkTchar NormalChar } -- in "when mode", we take all characters until the next "{"
 <whn> \{           { beginBlock `andBegin` 0} -- the "when" part ends with a "{"
+<srp> @space       { mkTstr Space }
+<srp> @identifier  { mkTstr Id }
+<srp> \(           { mkTs BeginParamList `andBegin` 0 } -- we mark the beginning of the parameter list but don't need the rest
 
 {
 data Token = EOF
            | NormalChar Char -- any character (restricted in some modes)
            | StmntSep
            | Send
+           | To
            | Reply
            | BeginString
            | EndString

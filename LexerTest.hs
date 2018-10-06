@@ -68,8 +68,31 @@ testlist = TestList [
   , tl "B3b" (cmt "}") []
   , tl "B3c" (cmt "{}") []
   , tl "When1" "input when true" $ [BeginInput, sp, BeginWhen] ++ mkN " true"
-  , tl "Iap1" "input msgX(int x) when x > 0 {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", EndParamList, sp, BeginWhen] ++ mkN " x > 0 " ++ [BeginBlock 0, EndBlock 0]
-  , tl "Iap2" "input msgX(int x,  String myS) when x > 0 && s=\"s\" {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", ParamSep, Space "  ", Id "String", sp, Id "myS", EndParamList, sp, BeginWhen] ++ mkN " x > 0 && s=\"s\" " ++ [BeginBlock 0, EndBlock 0]
-  -- TODO more tests with different spacing etc.
-  -- TODO test Send, Reply
+  , tl "Input1a" "input " [BeginInput, sp]
+  , tl "Input1b" "input\n" $ [BeginInput, Space "\n"]
+  , tl "Input2a" "_input" $ mkN "_input"
+  , tl "Input2b" "input_" $ mkN "input_"
+  , tl "Input2c" " input\n" $ mkN " input\n"
+  , tl "IapIn1" "input msgX(int x) {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", EndParamList, sp, BeginBlock 0, EndBlock 0]
+  , tl "IapIn2" "input msgX(int x) when x > 0 {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", EndParamList, sp, BeginWhen] ++ mkN " x > 0 " ++ [BeginBlock 0, EndBlock 0]
+  , tl "IapIn3" "input msgX(int x,  String myS) when x > 0 && s=\"s\" {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", ParamSep, Space "  ", Id "String", sp, Id "myS", EndParamList, sp, BeginWhen] ++ mkN " x > 0 && s=\"s\" " ++ [BeginBlock 0, EndBlock 0]
+  , tl "Send1a" "send " [Send, sp]
+  , tl "Send1b" "\nsend " [NormalChar '\n', Send, sp]
+  , tl "Send1c" "\nsend\n" [NormalChar '\n', Send, Space "\n"]
+  , tl "Send2a" " send" $ mkN " send"
+  , tl "Send2b" "_send" $ mkN "_send"
+  , tl "To1a" "to " [To, NormalChar ' ']
+  , tl "To1b" "\nto " [NormalChar '\n', To, NormalChar ' ']
+  , tl "To1c" "\nto\n" [NormalChar '\n', To, NormalChar '\n']
+  , tl "To2a" " to" $ mkN " to"
+  , tl "To2b" "_to" $ mkN "_to"
+  , tl "SendTo1" "send msgX(0) to 4" $ [Send, sp, Id "msgX", BeginParamList] ++ mkN "0) " ++ [To] ++ mkN " 4"
+  , tl "SendTo2" "send\n  My(getX(), \"send\") to getDest();" $ [Send, Space "\n  ", Id "My", BeginParamList] ++ mkN "getX(), " ++ mkStr "send" ++ mkN ") " ++ [To] ++ mkN " getDest()" ++ [StmntSep]
+  , tl "Reply1a" "reply " [Reply, sp]
+  , tl "Reply1b" "\nreply " [NormalChar '\n', Reply, sp]
+  , tl "Reply1c" "\nreply\n" [NormalChar '\n', Reply, Space "\n"]
+  , tl "Reply2a" " reply" $ mkN " reply"
+  , tl "Reply2b" "_reply" $ mkN "_reply"
+  , tl "Reply2" "reply  m((1 + 2), a) ;" $ [Reply, Space "  ", Id "m", BeginParamList] ++ mkN "(1 + 2), a) " ++ [StmntSep]
+  , tl "Iap1" "input A(int i) {reply B(i);}" $ [BeginInput, sp, Id "A", BeginParamList, Id "int", sp, Id "i", EndParamList, sp, BeginBlock 0, Reply, sp, Id "B", BeginParamList] ++ mkN "i)" ++ [StmntSep, EndBlock 0]
   ]
