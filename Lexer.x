@@ -39,12 +39,12 @@ state :-
 -- Some keywords must start a new line (input) or be preceded by some space and be followed by some space
 <0>  \n  ^ "input" / @space   { mkTs BeginInput `andBegin` inp } -- switch to "input mode"
 <0>  $kp ^ "send" / @space  { mkTs Send `andBegin` srp } -- switch to "send/reply" mode
-<0>  $wn ^ "to" / @space       { mkTs To }
-<0>  $kp ^ "reply" / @space    { mkTs Reply `andBegin` srp }
+<0>  $wn ^ "to" / @space       { mkTs To } -- ("send/reply" mode is only active until beginning of parameter list)
+<0>  $kp ^ "reply" / @space    { mkTs Reply `andBegin` srp } -- switch to "send/reply" mode
 <0>   \;           { mkTs StmntSep }
-<0>   \"           { mkTs BeginString `andBegin` str }
+<0>   \"           { mkTs BeginString `andBegin` str } -- switch to "string" mode
 <0>   @linecmt     { skip }
-<0>   "/*"         { enterNewComment `andBegin` cmt }
+<0>   "/*"         { enterNewComment `andBegin` cmt } -- switch to "comment" mode
 <0>   \{           { beginBlock }
 <0>   \}           { endBlock }
 <0>  $normalchar   { mkTchar NormalChar }
@@ -53,7 +53,7 @@ state :-
 <cmt> .            ;
 <cmt> \n           { skip }
 <str> [^\"]        { mkTchar StringChar }
-<str> \"           { mkTs EndString `andBegin` 0 }
+<str> \"           { mkTs EndString `andBegin` 0 } -- switch back to normal mode
 -- In "input mode", ony a parameter list with whitespaces is allowed
 <inp> \(           { mkTs BeginParamList }
 <inp> \)           { mkTs EndParamList }
