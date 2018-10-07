@@ -1,4 +1,4 @@
-module LexerTest() where
+module LexerTest where
 
 import Lexer (Token(..), scanner)
 import Test.HUnit
@@ -93,6 +93,7 @@ testlist = TestList [
   , tl "Reply1c" "\nreply\n" [NormalChar '\n', Reply, Space "\n"]
   , tl "Reply2a" " reply" $ mkN " reply"
   , tl "Reply2b" "_reply" $ mkN "_reply"
-  , tl "Reply2" "reply  m((1 + 2), a) ;" $ [Reply, Space "  ", Id "m", BeginParamList] ++ mkN "(1 + 2), a) " ++ [StmntSep]
+  , tl "Reply3a" "reply  m((1 + 2), a) ;" $ [Reply, Space "  ", Id "m", BeginParamList] ++ mkN "(1 + 2), a) " ++ [StmntSep]
+  , tl "Reply3b" "reply  m ((1 + 2), a) ;" $ [Reply, Space "  ", Id "m", Space " ", BeginParamList] ++ mkN "(1 + 2), a) " ++ [StmntSep]
   , tl "Iap1" "input A(int i) {reply B(i);}" $ [BeginInput, sp, Id "A", BeginParamList, Id "int", sp, Id "i", EndParamList, sp, BeginBlock 0, Reply, sp, Id "B", BeginParamList] ++ mkN "i)" ++ [StmntSep, EndBlock 0]
   ]
