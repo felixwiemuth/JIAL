@@ -1,8 +1,9 @@
 module ParserTest where
 
-import Lexer (Token(..), scanner)
-import Parser (Task, TaskElem(..), parse)
-import LexerTest
+import qualified Lexer as L
+import Parser
+import qualified LexerTest as L
+import qualified Symbols as S
 import Test.HUnit
 
 
@@ -10,7 +11,7 @@ import Test.HUnit
 -- mkParseTestCase name res mkA = TestCase $ if (assertFailure . ((name ++ ": ") ++)) mkA res
 
 -- test lex
-tp :: String -> [Token] -> [TaskElem] -> Test
+tp :: String -> [L.Token] -> [TaskElem] -> Test
 tp name input expectedResult =
     TestCase $ assertEqual name expectedResult (parse input)
 
@@ -23,15 +24,21 @@ cmt s = "//" ++ s ++ "\n"
 -- Token list constructors
 
 -- String
-mkStr :: String -> [Token]
-mkStr s = [BeginString] ++ map StringChar s ++ [EndString]
+mkStr = L.mkStr
 
 -- Sequence of "normal characters" (no control characters)
-mkN :: String -> [Token]
-mkN = map NormalChar
+mkN :: String -> [L.Token]
+mkN = map L.NormalChar
+
+sep = NormalCharBlock S.stmntSep
 
 
 main = runTestTT testlist
+
+
+-- Test list shortcuts
+
+input1 = [L.BeginInput, L.sp, L.Id "A", L.BeginParamList, L.Id "int", L.sp, L.Id "i", L.EndParamList, L.sp]
 
 testlist :: Test
 testlist = TestList [
@@ -48,4 +55,13 @@ testlist = TestList [
   , tp "AS5" (mkStr "x x" ++ mkN "a" ++ mkStr "a") $ [TString "x x", NormalCharBlock "a", TString "a"]
   , tp "AS6" (mkStr "x x" ++ mkN "a" ++ mkStr "a" ++ mkN "") $ [TString "x x", NormalCharBlock "a", TString "a"]
   , tp "AS7" (mkStr "x x" ++ mkN "a" ++ mkStr "a" ++ mkN " ") $ [TString "x x", NormalCharBlock "a", TString "a", NormalCharBlock " "]
+  -- , tp "Sp1" [Space " "] " "
+  , tp "Sep1" [L.StmntSep] [sep]
+  , tp "Sep2" [L.StmntSep, L.StmntSep] [sep, sep]
+  , tp "Iap1a" ([L.BeginInput, L.sp, L.Id "A", L.BeginParamList, L.Id "int", L.sp, L.Id "i", L.EndParamList, L.sp, L.BeginBlock 0, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) []]
+  , tp "Iap1b" ([L.BeginInput, L.sp, L.Id "A", L.BeginParamList, L.Id "int", L.sp, L.Id "i", L.ParamSep, L.Id "String", L.sp, L.Id "s", L.EndParamList, L.BeginBlock 0, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i"), ("String", "s")], cond=Nothing}) []]
+  , tp "Iap3a" (input1 ++ [L.BeginBlock 0, L.StmntSep, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [Sep]]
+  , tp "Iap3b" (input1 ++ [L.BeginBlock 0] ++ mkN "int k=0" ++ [L.StmntSep, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep]]
+  , tp "Iap3c" (input1 ++ [L.BeginBlock 0] ++ mkN "int k=0" ++ [L.StmntSep] ++ mkN "k++" ++ [L.StmntSep, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, CodeBlock "k++", Sep]]
+  , tp "Iap3d" (input1 ++ [L.BeginBlock 0] ++ mkN "int k=0" ++ [L.StmntSep, L.Reply, L.sp, L.Id "B", L.BeginParamList] ++ mkN "i)" ++ [L.StmntSep, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, Reply{sp1=" ", rmsgT="B", sp2="", code="i)"}]]
   ]
