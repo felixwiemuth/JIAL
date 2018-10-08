@@ -42,7 +42,7 @@ state :-
 <0>  $wn ^ "to" / @space       { mkTs To } -- ("send/reply" mode is only active until beginning of parameter list)
 <0>  $kp ^ "reply" / @space    { mkTs Reply `andBegin` srp } -- switch to "send/reply" mode
 <0>   \;           { mkTs StmntSep }
-<0>   \"           { mkTs BeginString `andBegin` str } -- switch to "string" mode
+<0>   \"           { mkTs (NormalChar '"') `andBegin` str } -- switch to "string" mode
 <0>   @linecmt     { skip }
 <0>   "/*"         { enterNewComment `andBegin` cmt } -- switch to "comment" mode
 <0>   \{           { beginBlock }
@@ -52,8 +52,8 @@ state :-
 <cmt> "*/"         { unembedComment }
 <cmt> .            ;
 <cmt> \n           { skip }
-<str> [^\"]        { mkTchar StringChar }
-<str> \"           { mkTs EndString `andBegin` 0 } -- switch back to normal mode
+<str> [^\"]        { mkTchar NormalChar }
+<str> \"           { mkTs (NormalChar '"') `andBegin` 0 } -- switch back to normal mode
 -- In "input mode", ony a parameter list with whitespaces is allowed
 <inp> \(           { mkTs BeginParamList }
 <inp> \)           { mkTs EndParamList }
@@ -79,7 +79,7 @@ data Token = EOF
            | EndString
            | BeginBlock Int -- block with depth (starts at 0)
            | EndBlock Int
-           | StringChar Char
+           -- | StringChar Char
            | BeginInput
            | BeginParamList
            | ParamSep

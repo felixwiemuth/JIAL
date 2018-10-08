@@ -23,8 +23,10 @@ cmt s = "//" ++ s ++ "\n"
 -- Token list constructors
 
 -- String
+-- mkStr :: String -> [Token]
+-- mkStr s = [BeginString] ++ map StringChar s ++ [EndString]
 mkStr :: String -> [Token]
-mkStr s = [BeginString] ++ map StringChar s ++ [EndString]
+mkStr s = NormalChar '"' : mkN s ++ [NormalChar '"']
 
 -- Sequence of "normal characters" (no control characters)
 mkN :: String -> [Token]
@@ -47,10 +49,11 @@ testlist = TestList [
   , tl "Sep1b" ";;" $ [StmntSep, StmntSep]
   , tl "Sep1c" " ; ;" $ mkN " " ++ [StmntSep] ++ mkN " " ++ [StmntSep]
   , tl "Sep2" "a;b" $ mkN "a" ++ [StmntSep] ++ mkN "b"
-  , tl "S1" "\"" [BeginString]
-  , tl "S2" "\"ok" [BeginString, StringChar 'o', StringChar 'k']
-  , tl "S3" "\"ok\"" [BeginString, StringChar 'o', StringChar 'k', EndString]
-  , tl "S4" "\"ok\"" [BeginString, StringChar 'o', StringChar 'k', EndString]
+  -- NOTE: Strings are not specially lexed anymore
+  -- , tl "S1" "\"" [BeginString]
+  -- , tl "S2" "\"ok" [BeginString, StringChar 'o', StringChar 'k']
+  -- , tl "S3" "\"ok\"" [BeginString, StringChar 'o', StringChar 'k', EndString]
+  -- , tl "S4" "\"ok\"" [BeginString, StringChar 'o', StringChar 'k', EndString]
   , tl "S5" "\"Hello World String\"" $ mkStr "Hello World String"
   , tl "S6" "/* commented \"String\" */" []
   , tl "S7" "/* commented \"String\" */ and \"string\" " $ mkN " and " ++ mkStr "string" ++ mkN " "

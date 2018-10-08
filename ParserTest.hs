@@ -23,8 +23,8 @@ cmt s = "//" ++ s ++ "\n"
 
 -- Token list constructors
 
--- String
-mkStr = L.mkStr
+mkStr :: String -> TaskElem
+mkStr s = NormalCharBlock $ "\"" ++ s ++ "\""
 
 -- Sequence of "normal characters" (no control characters)
 mkN :: String -> [L.Token]
@@ -45,16 +45,17 @@ testlist = TestList [
     tp "A1" (mkN "") $ []
   , tp "A2a" (mkN "a") $ [NormalCharBlock "a"]
   , tp "A2b" (mkN "ab") $ [NormalCharBlock "ab"]
-  , tp "S1" (mkStr "") $ [TString ""]
-  , tp "S2" (mkStr "abc") $ [TString "abc"]
-  , tp "S3" (mkStr " a b c") $ [TString " a b c"]
-  , tp "AS1" (mkN "" ++ mkStr "") $ [TString ""]
-  , tp "AS2" (mkN "a" ++ mkStr "") $ [NormalCharBlock "a", TString ""]
-  , tp "AS3" (mkN "a" ++ mkStr "a") $ [NormalCharBlock "a", TString "a"]
-  , tp "AS4" (mkN " ! q //p" ++ mkStr "/*sd*/") $ [NormalCharBlock " ! q //p", TString "/*sd*/"]
-  , tp "AS5" (mkStr "x x" ++ mkN "a" ++ mkStr "a") $ [TString "x x", NormalCharBlock "a", TString "a"]
-  , tp "AS6" (mkStr "x x" ++ mkN "a" ++ mkStr "a" ++ mkN "") $ [TString "x x", NormalCharBlock "a", TString "a"]
-  , tp "AS7" (mkStr "x x" ++ mkN "a" ++ mkStr "a" ++ mkN " ") $ [TString "x x", NormalCharBlock "a", TString "a", NormalCharBlock " "]
+  -- NOTE: the lexer does not produce separate string symbols anymore
+  -- , tp "S1" (L.mkStr "") $ [TString ""]
+  -- , tp "S2" (L.mkStr "abc") $ [TString "abc"]
+  -- , tp "S3" (L.mkStr " a b c") $ [TString " a b c"]
+  , tp "AS1" (mkN "" ++ L.mkStr "") $ [mkStr ""]
+  , tp "AS2" (mkN "a" ++ L.mkStr "") $ [NormalCharBlock "a\"\""]
+  , tp "AS3" (mkN "a" ++ L.mkStr "a") $ [NormalCharBlock "a\"a\""]
+  , tp "AS4" (mkN " ! q //p" ++ L.mkStr "/*sd*/") $ [NormalCharBlock " ! q //p\"/*sd*/\""]
+  -- , tp "AS5" (L.mkStr "x x" ++ mkN "a" ++ L.mkStr "a") $ [TString "x x", NormalCharBlock "a", TString "a"]
+  -- , tp "AS6" (L.mkStr "x x" ++ mkN "a" ++ L.mkStr "a" ++ mkN "") $ [TString "x x", NormalCharBlock "a", TString "a"]
+  -- , tp "AS7" (L.mkStr "x x" ++ mkN "a" ++ L.mkStr "a" ++ mkN " ") $ [TString "x x", NormalCharBlock "a", TString "a", NormalCharBlock " "]
   -- , tp "Sp1" [Space " "] " "
   , tp "Sep1" [L.StmntSep] [sep]
   , tp "Sep2" [L.StmntSep, L.StmntSep] [sep, sep]

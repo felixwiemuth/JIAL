@@ -18,7 +18,7 @@ beginString { L.BeginString }
 endString { L.EndString }
 beginBlock { L.BeginBlock $$ }
 endBlock { L.EndBlock $$ }
-stringChar { L.StringChar $$ }
+-- stringChar { L.StringChar $$ }
 beginInput { L.BeginInput }
 beginParamList { L.BeginParamList }
 paramSep { L.ParamSep }
@@ -36,20 +36,21 @@ Task : TaskElemList { reverse $1 }
 TaskElemList : {- empty -} { [] }
              | TaskElemList TaskElem { $2:$1  }
 
-TaskElem : beginString StringCharList endString { TString $ reverse $2 }
-         | NormalCharList { NormalCharBlock $1 }
+TaskElem : -- beginString StringCharList endString { TString $ reverse $2 }
+           NormalCharList { NormalCharBlock $1 }
          | stmntSep { NormalCharBlock S.stmntSep } -- in normal mode, ";" does not have to be considered specially, it is thus put into a NormalCharBlock
          | IAP { $1 }
 
-StringCharList :: { String }
-StringCharList : {- empty -} { [] }
-               | StringCharList stringChar { $2:$1 }
+-- StringCharList :: { String }
+-- StringCharList : {- empty -} { [] }
+--                | StringCharList stringChar { $2:$1 }
 
 NormalCharList :: { String }
 NormalCharList : NormalCharList_ { reverse $1 }
 
 NormalCharList_ :: { String }
 NormalCharList_ : normalChar { [$1] }
+                -- | beginString StringCharList endString {  } -- If want to deal with Strings here
                 | NormalCharList_ normalChar { $2:$1 }
 
 IAP :: { TaskElem }
@@ -104,7 +105,7 @@ data Task
 
 data TaskElem
   = NormalCharBlock String
-  | TString String
+  -- | TString String
   | StmntSep
   | IAP Input [ActionElem]
   deriving (Eq, Show)
