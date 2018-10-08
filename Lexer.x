@@ -48,6 +48,8 @@ state :-
 <0>   \{           { beginBlock }
 <0>   \}           { endBlock }
 <0>  $normalchar   { mkTchar NormalChar }
+<pre> \n ^ "task" / @space { mkTs BeginTask `andBegin` 0}
+<pre> $normalchar   { mkTchar NormalChar }
 <cmt> "/*"         { embedComment }
 <cmt> "*/"         { unembedComment }
 <cmt> .            ;
@@ -71,6 +73,7 @@ state :-
 {
 data Token = EOF
            | NormalChar Char -- any character (restricted in some modes)
+           | BeginTask
            | StmntSep
            | Reply
            | Send

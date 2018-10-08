@@ -10,6 +10,7 @@ import qualified Symbols as S
 
 %token
 normalChar { L.NormalChar $$ }
+beginTask { L.BeginTask }
 stmntSep { L.StmntSep }
 reply { L.Reply }
 send { L.Send }
@@ -30,8 +31,9 @@ id { L.Id $$ }
 
 %%
 
-Task :: { [TaskElem] }
-Task : TaskElemList { reverse $1 }
+Task :: { Task }
+Task : NormalCharList beginTask Sp id Sp beginBlock TaskElemList endBlock { Task { prelude = $1, name = $4, elements = reverse $7 } }
+     | beginTask Sp id Sp beginBlock TaskElemList endBlock { Task { prelude = "", name = $3, elements = reverse $6 } }
 
 TaskElemList : {- empty -} { [] }
              | TaskElemList TaskElem { $2:$1  }
@@ -79,7 +81,7 @@ Param :: { (String, String) }
 Param : id Sp id Sp { ($1, $3) }
 
 Action :: { [ActionElem] }
-Action : beginBlock ActionElemList endBlock { reverse $2 }
+Action : beginBlock ActionElemList endBlock { reverse $2 } -- TODO block must be level 1
 
 ActionElemList :: { [ActionElem] } -- reversed list of action elements
 ActionElemList : {- empty -} { [] }
@@ -99,8 +101,7 @@ Sp : sp          { $1 }
 parseError :: [L.Token] -> a
 parseError tokens = error $ "Parse error on tokens " ++ show tokens
 
-data Task
-  = TaskList [TaskElem]
+data Task = Task { prelude :: String, name :: String, elements :: [TaskElem] }
   deriving (Eq, Show)
 
 data TaskElem

@@ -10,10 +10,11 @@ import Test.HUnit
 -- mkParseTestCase :: [Token] -> Either String Task -> (Task -> Assertion) -> Test
 -- mkParseTestCase name res mkA = TestCase $ if (assertFailure . ((name ++ ": ") ++)) mkA res
 
--- test lex
+-- test parsing of task elements
 tp :: String -> [L.Token] -> [TaskElem] -> Test
 tp name input expectedResult =
-    TestCase $ assertEqual name expectedResult (parse input)
+    TestCase $ assertEqual name expectedResult result
+    where result = elements (parse ([L.BeginTask, L.sp, L.Id "A", L.BeginBlock 0] ++ input ++ [L.EndBlock 0]))
 
 
 -- input constructors
