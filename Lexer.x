@@ -72,9 +72,9 @@ state :-
 data Token = EOF
            | NormalChar Char -- any character (restricted in some modes)
            | StmntSep
+           | Reply
            | Send
            | To
-           | Reply
            | BeginString
            | EndString
            | BeginBlock Int -- block with depth (starts at 0)
@@ -82,11 +82,11 @@ data Token = EOF
            | StringChar Char
            | BeginInput
            | BeginParamList
-           | EndParamList
            | ParamSep
+           | EndParamList
+           | BeginWhen -- then "when" keyword
            | Space String -- Sequence of whitespaces
            | Id String
-           | BeginWhen -- then "when" keyword
   deriving (Show, Eq)
 
 alexEOF :: Alex Token

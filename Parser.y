@@ -12,6 +12,8 @@ import qualified Symbols as S
 normalChar { L.NormalChar $$ }
 stmntSep { L.StmntSep }
 reply { L.Reply }
+send { L.Send }
+to { L.To }
 beginString { L.BeginString }
 endString { L.EndString }
 beginBlock { L.BeginBlock $$ }
@@ -36,7 +38,7 @@ TaskElemList : {- empty -} { [] }
 
 TaskElem : beginString StringCharList endString { TString $ reverse $2 }
          | NormalCharList { NormalCharBlock $1 }
-         | stmntSep { NormalCharBlock S.stmntSep } -- TODO: in normal mode, do not have to consider ";" ? (only inside iaps); can use it as normal char block here (use Symbols.Sep as char)
+         | stmntSep { NormalCharBlock S.stmntSep } -- in normal mode, ";" does not have to be considered specially, it is thus put into a NormalCharBlock
          | IAP { $1 }
 
 StringCharList :: { String }
@@ -85,7 +87,8 @@ ActionElemList : {- empty -} { [] }
 ActionElem :: { ActionElem }
 ActionElem : NormalCharList { CodeBlock $1 }
            | stmntSep { Sep }
-           | reply Sp id Sp beginParamList NormalCharList stmntSep { Reply{sp1=$2, rmsgT=$3, sp2=$4, code=$6} }
+           | reply Sp id Sp beginParamList NormalCharList stmntSep { Reply{sp1=$2, rmsgT=$3, sp2=$4, paramCode=$6} }
+           | send Sp id Sp beginParamList NormalCharList to NormalCharList stmntSep { Send{sp1=$2, smsgT=$3, sp2=$4, paramCode=$6, toCode=$8} }
 
 Sp :: { String }
 Sp : sp          { $1 }
@@ -118,8 +121,8 @@ data Input = Input { msgT :: String
 data ActionElem
   = CodeBlock String
   | Sep
-  | Reply {sp1 :: String, rmsgT :: String, sp2 :: String, code :: String} -- code does not include beginParamList and stmntSep symbols
-  | Send
+  | Reply {sp1 :: String, rmsgT :: String, sp2 :: String, paramCode :: String} -- code does not include beginParamList and stmntSep symbols
+  | Send {sp1 :: String, smsgT :: String, sp2 :: String, paramCode :: String, toCode :: String}
   deriving (Eq, Show)
 
 }
