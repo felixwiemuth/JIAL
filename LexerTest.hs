@@ -39,6 +39,7 @@ main = runTestTT testlist
 
 testlist :: Test
 testlist = TestList [
+  -- Basics
     tl "A1" "a" $ mkN "a"
   , tl "A2" "ab" $ mkN "ab"
   , tl "A3" "a b" $ mkN "a b"
@@ -70,12 +71,14 @@ testlist = TestList [
   , tl "B3a" (cmt "{") []
   , tl "B3b" (cmt "}") []
   , tl "B3c" (cmt "{}") []
+  -- Input-Action-pairs, reply/send
   , tl "When1" "input when true" $ [BeginInput, sp, BeginWhen] ++ mkN " true"
   , tl "Input1a" "input " [BeginInput, sp]
   , tl "Input1b" "input\n" $ [BeginInput, Space "\n"]
+  , tl "Input1c" " input\n" $ [NormalChar ' ', BeginInput, Space "\n"]
   , tl "Input2a" "_input" $ mkN "_input"
   , tl "Input2b" "input_" $ mkN "input_"
-  , tl "Input2c" " input\n" $ mkN " input\n"
+  -- , tl "Input2c" " input\n" $ mkN " input\n"
   , tl "IapIn1" "input msgX(int x) {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", EndParamList, sp, BeginTaskBody, EndTask]
   , tl "IapIn2" "input msgX(int x) when x > 0 {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", EndParamList, sp, BeginWhen] ++ mkN " x > 0 " ++ [BeginTaskBody, EndTask]
   , tl "IapIn3" "input msgX(int x,  String myS) when x > 0 && s=\"s\" {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", ParamSep, Space "  ", Id "String", sp, Id "myS", EndParamList, sp, BeginWhen] ++ mkN " x > 0 && s=\"s\" " ++ [BeginTaskBody, EndTask]
@@ -99,4 +102,8 @@ testlist = TestList [
   , tl "Reply3a" "reply  m((1 + 2), a) ;" $ [Reply, Space "  ", Id "m", BeginParamList] ++ mkN "(1 + 2), a) " ++ [StmntSep]
   , tl "Reply3b" "reply  m ((1 + 2), a) ;" $ [Reply, Space "  ", Id "m", Space " ", BeginParamList] ++ mkN "(1 + 2), a) " ++ [StmntSep]
   , tl "Iap1" "input A(int i) {reply B(i);}" $ [BeginInput, sp, Id "A", BeginParamList, Id "int", sp, Id "i", EndParamList, sp, BeginTaskBody, Reply, sp, Id "B", BeginParamList] ++ mkN "i)" ++ [StmntSep, EndTask]
+  -- File format
+  , tl "F1" "task A {}" [BeginTaskHeader, sp, Id "A", sp, BeginTaskBody, EndTask]
+  , tl "F2" "\ntask A {}" [NormalChar '\n', BeginTaskHeader, sp, Id "A", sp, BeginTaskBody, EndTask]
+  , tl "F3" "task  A  { } " [BeginTaskHeader, Space "  ", Id "A", Space "  ", BeginTaskBody, NormalChar ' ', EndTask, NormalChar ' ']
   ]

@@ -37,7 +37,8 @@ $kp = [$wn \{] -- keyword prefix
 state :-
 
 -- Some keywords must start a new line (input) or be preceded by some space and be followed by some space
-<0>  \n  ^ "input" / @space   { mkTs BeginInput `andBegin` inp } -- switch to "input mode"
+<0>  \n  ^ "task" / @space { mkTs BeginTaskHeader `andBegin` tsk } -- "task" keyword must start a new line
+<0>  $wn  ^ "input" / @space   { mkTs BeginInput `andBegin` inp } -- "input" keyword can be preceded by new line or spcace; switch to "input mode"
 <0>  $kp ^ "send" / @space  { mkTs Send `andBegin` srp } -- switch to "send/reply" mode
 <0>  $wn ^ "to" / @space       { mkTs To } -- ("send/reply" mode is only active until beginning of parameter list)
 <0>  $kp ^ "reply" / @space    { mkTs Reply `andBegin` srp } -- switch to "send/reply" mode
@@ -48,14 +49,18 @@ state :-
 <0>   \{           { beginBlock }
 <0>   \}           { endBlock }
 <0>  $normalchar   { mkTchar NormalChar }
-<pre> \n ^ "task" / @space { mkTs BeginTaskHeader `andBegin` 0}
-<pre> $normalchar   { mkTchar NormalChar }
+-- Comment mode
 <cmt> "/*"         { embedComment }
 <cmt> "*/"         { unembedComment }
 <cmt> .            ;
 <cmt> \n           { skip }
+-- String mode
 <str> [^\"]        { mkTchar NormalChar }
 <str> \"           { mkTs (NormalChar '"') `andBegin` 0 } -- switch back to normal mode
+-- "Task header" mode
+<tsk> @space       { mkTstr Space }
+<tsk> @identifier  { mkTstr Id }
+<tsk> \{           { beginBlock `andBegin` 0 } -- the "input" part ends with a "{"
 -- In "input mode", ony a parameter list with whitespaces is allowed
 <inp> \(           { mkTs BeginParamList }
 <inp> \)           { mkTs EndParamList }
@@ -63,9 +68,11 @@ state :-
 <inp> $wn ^ "when" / @space  { mkTs BeginWhen `andBegin` whn } -- the "input" part ends with a "when", switch to "when mode"
 <inp> @space       { mkTstr Space }
 <inp> @identifier  { mkTstr Id }
-<inp> \{           { beginBlock `andBegin` 0} -- the "input" part ends with a "{"
+<inp> \{           { beginBlock `andBegin` 0 } -- the "input" part ends with a "{"
+-- "When part" mode
 <whn> $whenchar    { mkTchar NormalChar } -- in "when mode", we take all characters until the next "{"
-<whn> \{           { beginBlock `andBegin` 0} -- the "when" part ends with a "{"
+<whn> \{           { beginBlock `andBegin` 0 } -- the "when" part ends with a "{"
+-- "Send/reply" mode
 <srp> @space       { mkTstr Space }
 <srp> @identifier  { mkTstr Id }
 <srp> \(           { mkTs BeginParamList `andBegin` 0 } -- we mark the beginning of the parameter list but don't need the rest
