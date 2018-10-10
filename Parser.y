@@ -36,8 +36,8 @@ id { L.Id $$ }
 %%
 
 Task :: { Task }
-Task : NormalCharList beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask { Task { prelude = $1, name = $4, elements = reverse $7 } }
-     | beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask { Task { prelude = "", name = $3, elements = reverse $6 } }
+Task : NormalCharList beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask NormalCharList { Task { prelude = $1, name = $4, elements = reverse $7, epilogue = $9 } }
+     | beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask NormalCharList { Task { prelude = "", name = $3, elements = reverse $6, epilogue = $8 } }
 
 TaskElemList : {- empty -} { [] }
              | TaskElemList TaskElem { $2:$1  }
@@ -105,7 +105,7 @@ Sp : sp          { $1 }
 parseError :: [L.Token] -> a
 parseError tokens = error $ "Parse error on tokens " ++ show tokens
 
-data Task = Task { prelude :: String, name :: String, elements :: [TaskElem] }
+data Task = Task { prelude :: String, name :: String, elements :: [TaskElem], epilogue :: String }
   deriving (Eq, Show)
 
 data TaskElem
