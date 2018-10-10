@@ -3,14 +3,21 @@ module Main where
 import System.Environment
 
 import qualified Lexer as Lexer
-import qualified Parser as Parser
+import Parser
 
 
 main = do args <- getArgs
-          net <- makeALGFromFiles args
-          print ""
+          tasksString <- makeALGFromFiles args
+          print tasksString
 
 makeALGFromFiles :: [String] -> IO String
 makeALGFromFiles files =
   let fs = map (\f -> (f, readFile f)) files :: [(String, IO String)]
-  in do return ""
+  in do tasks <- mapM (\(filename, content) -> do s <- content; return $ makeTask s) fs
+        -- print tasks
+        return $ show tasks
+
+
+makeTask :: String -> Either String Task
+makeTask s = do tokens <- Lexer.scanner s
+                return $ parse tokens

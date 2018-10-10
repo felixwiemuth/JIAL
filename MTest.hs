@@ -1,11 +1,13 @@
 module MTest where
 
+import System.Environment
+
 import qualified Lexer as Lexer
 import qualified Parser as Parser
 
 
 main = do
-  putStrLn "Command is \"p\" - available commands: l, p, lp"
+  putStrLn "Command is \"p\" - available commands: l, p, lp, lf"
   loop "p"
 
 loop cmd = do
@@ -15,6 +17,9 @@ loop cmd = do
     "l" -> do
       putStrLn "Switched to lexer"
       loop "l"
+    "lf" -> do
+      putStrLn "Switched to lexer (files)"
+      loop "lf"
     "p" -> do
       putStrLn "Switched to parser"
       loop "p"
@@ -26,7 +31,13 @@ loop cmd = do
       -- let cmd = head $ words line
       -- let t = dropWhile (/=' ') line
       -- putStrLn $ runCmd cmd t
-      putStrLn $ runCmd cmd line
+      case cmd of
+        "lf" -> do
+                f <- readFile line
+                let tokens = Lexer.scanner f
+                putStrLn $ show tokens
+                return ()
+        _ -> putStrLn $ runCmd cmd line
       loop cmd
 
 runCmd cmd arg = case cmd of
