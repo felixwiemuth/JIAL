@@ -48,7 +48,7 @@ state :-
 <0>   \{           { beginBlock }
 <0>   \}           { endBlock }
 <0>  $normalchar   { mkTchar NormalChar }
-<pre> \n ^ "task" / @space { mkTs BeginTask `andBegin` 0}
+<pre> \n ^ "task" / @space { mkTs BeginTaskHeader `andBegin` 0}
 <pre> $normalchar   { mkTchar NormalChar }
 <cmt> "/*"         { embedComment }
 <cmt> "*/"         { unembedComment }
@@ -73,15 +73,19 @@ state :-
 {
 data Token = EOF
            | NormalChar Char -- any character (restricted in some modes)
-           | BeginTask
+           | BeginTaskHeader
+           | BeginTaskBody
+           | EndTask
            | StmntSep
            | Reply
            | Send
            | To
            | BeginString
            | EndString
-           | BeginBlock Int -- block with depth (starts at 0)
-           | EndBlock Int
+           | BeginAction
+           | EndAction
+           -- | BeginBlock Int -- block with depth (starts at 0)
+           -- | EndBlock Int
            -- | StringChar Char
            | BeginInput
            | BeginParamList
@@ -133,12 +137,20 @@ beginString input len =
 beginBlock input len =
     do d <- getLexerBlockDepth
        setLexerBlockDepth (d + 1)
-       return $ BeginBlock d
+       return $
+         case d of
+           0 -> BeginTaskBody
+           1 -> BeginAction
+           _ -> NormalChar '{'
 
 endBlock input len =
     do d <- getLexerBlockDepth
        setLexerBlockDepth (d - 1)
-       return $ EndBlock (d - 1)
+       return $
+         case d-1 of
+           0 -> EndTask
+           1 -> EndAction
+           _ -> NormalChar '}'
 
 enterNewComment input len =
     do setLexerCommentDepth 1

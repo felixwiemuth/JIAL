@@ -10,21 +10,25 @@ import qualified Symbols as S
 
 %token
 normalChar { L.NormalChar $$ }
-beginTask { L.BeginTask }
+beginTaskHeader { L.BeginTaskHeader }
+beginTaskBody { L.BeginTaskBody }
+endTask { L.EndTask }
 stmntSep { L.StmntSep }
 reply { L.Reply }
 send { L.Send }
 to { L.To }
 beginString { L.BeginString }
 endString { L.EndString }
-beginBlock { L.BeginBlock $$ }
-endBlock { L.EndBlock $$ }
+-- beginBlock { L.BeginBlock $$ }
+-- endBlock { L.EndBlock $$ }
 -- stringChar { L.StringChar $$ }
 beginInput { L.BeginInput }
 beginParamList { L.BeginParamList }
 paramSep { L.ParamSep }
 endParamList { L.EndParamList }
 beginWhen { L.BeginWhen }
+beginAction { L.BeginAction }
+endAction { L.EndAction }
 sp { L.Space $$ }
 id { L.Id $$ }
 
@@ -32,8 +36,8 @@ id { L.Id $$ }
 %%
 
 Task :: { Task }
-Task : NormalCharList beginTask Sp id Sp beginBlock TaskElemList endBlock { Task { prelude = $1, name = $4, elements = reverse $7 } }
-     | beginTask Sp id Sp beginBlock TaskElemList endBlock { Task { prelude = "", name = $3, elements = reverse $6 } }
+Task : NormalCharList beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask { Task { prelude = $1, name = $4, elements = reverse $7 } }
+     | beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask { Task { prelude = "", name = $3, elements = reverse $6 } }
 
 TaskElemList : {- empty -} { [] }
              | TaskElemList TaskElem { $2:$1  }
@@ -81,7 +85,7 @@ Param :: { (String, String) }
 Param : id Sp id Sp { ($1, $3) }
 
 Action :: { [ActionElem] }
-Action : beginBlock ActionElemList endBlock { reverse $2 } -- TODO block must be level 1
+Action : beginAction ActionElemList endAction { reverse $2 } -- TODO block must be level 1
 
 ActionElemList :: { [ActionElem] } -- reversed list of action elements
 ActionElemList : {- empty -} { [] }

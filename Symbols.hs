@@ -1,5 +1,7 @@
-module Symbols (stmntSep) where
+module Symbols where
 
 stmntSep = ";"
+-- beginBlock = "{" -- entered manually
+-- endBlock = "}"
 -- beginString = "\""
 -- endString = "\""

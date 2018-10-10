@@ -14,8 +14,13 @@ import Test.HUnit
 tp :: String -> [L.Token] -> [TaskElem] -> Test
 tp name input expectedResult =
     TestCase $ assertEqual name expectedResult result
-    where result = elements (parse ([L.BeginTask, L.sp, L.Id "A", L.BeginBlock 0] ++ input ++ [L.EndBlock 0]))
+    where result = elements (parse ([L.BeginTaskHeader, L.sp, L.Id "A", L.BeginTaskBody] ++ input ++ [L.EndTask]))
 
+-- test whole file parsing
+tfp :: String -> [L.Token] -> [TaskElem] -> Test
+tfp name input expectedResult =
+    TestCase $ assertEqual name expectedResult result
+    where result = elements (parse ([L.BeginTaskHeader, L.sp, L.Id "A", L.BeginTaskBody] ++ input ++ [L.EndTask]))
 
 -- input constructors
 -- Add a line comment with end of line
@@ -60,13 +65,14 @@ testlist = TestList [
   -- , tp "Sp1" [Space " "] " "
   , tp "Sep1" [L.StmntSep] [sep]
   , tp "Sep2" [L.StmntSep, L.StmntSep] [sep, sep]
-  , tp "Iap1a" ([L.BeginInput, L.sp, L.Id "A", L.BeginParamList, L.Id "int", L.sp, L.Id "i", L.EndParamList, L.sp, L.BeginBlock 0, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) []]
-  , tp "Iap1b" ([L.BeginInput, L.sp, L.Id "A", L.BeginParamList, L.Id "int", L.sp, L.Id "i", L.ParamSep, L.Id "String", L.sp, L.Id "s", L.EndParamList, L.BeginBlock 0, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i"), ("String", "s")], cond=Nothing}) []]
-  , tp "Iap3a" (input1 ++ [L.BeginBlock 0, L.StmntSep, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [Sep]]
-  , tp "Iap3b" (input1 ++ [L.BeginBlock 0] ++ mkN "int k=0" ++ [L.StmntSep, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep]]
-  , tp "Iap3c" (input1 ++ [L.BeginBlock 0] ++ mkN "int k=0" ++ [L.StmntSep] ++ mkN "k++" ++ [L.StmntSep, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, CodeBlock "k++", Sep]]
-  , tp "Iap3d" (input1 ++ [L.BeginBlock 0] ++ mkN "int k=0" ++ [L.StmntSep, L.Reply, L.sp, L.Id "B", L.BeginParamList] ++ mkN "i)" ++ [L.StmntSep, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, Reply{sp1=" ", rmsgT="B", sp2="", paramCode="i)"}]]
-  , tp "Iap3e" (input1 ++ [L.BeginBlock 0] ++ mkN "int k=0" ++ [L.StmntSep, L.Send, L.sp, L.Id "B", L.BeginParamList] ++ mkN "i) " ++ [L.To] ++ mkN " 5" ++ [L.StmntSep, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, Send{sp1=" ", smsgT="B", sp2="", paramCode="i) ", toCode=" 5"}]]
-  , tp "Iap3f" (input1 ++ [L.BeginBlock 0] ++ mkN "int k=0" ++ [L.StmntSep, L.Send, L.sp, L.Id "X", L.BeginParamList] ++ mkN "i, (1+1)) " ++ [L.To] ++ mkN " getId(k) + 1" ++ [L.StmntSep, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, Send{sp1=" ", smsgT="X", sp2="", paramCode="i, (1+1)) ", toCode=" getId(k) + 1"}]]
-  , tp "Iap3g" (input1 ++ [L.BeginBlock 0] ++ mkN "int k=0" ++ [L.StmntSep, L.Send, L.sp, L.Id "B", L.BeginParamList] ++ mkN "i) " ++ [L.To] ++ mkN " 5" ++ [L.StmntSep, L.Reply, L.sp, L.Id "B", L.BeginParamList] ++ mkN "i)" ++ [L.StmntSep, L.EndBlock 0]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, Send{sp1=" ", smsgT="B", sp2="", paramCode="i) ", toCode=" 5"}, Reply{sp1=" ", rmsgT="B", sp2="", paramCode="i)"}]]
+  , tp "Iap1a" ([L.BeginInput, L.sp, L.Id "A", L.BeginParamList, L.Id "int", L.sp, L.Id "i", L.EndParamList, L.sp, L.BeginAction, L.EndAction]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) []]
+  , tp "Iap1b" ([L.BeginInput, L.sp, L.Id "A", L.BeginParamList, L.Id "int", L.sp, L.Id "i", L.ParamSep, L.Id "String", L.sp, L.Id "s", L.EndParamList, L.BeginAction, L.EndAction]) $ [IAP (Input {msgT="A", params=[("int", "i"), ("String", "s")], cond=Nothing}) []]
+  , tp "Iap3a" (input1 ++ [L.BeginAction, L.StmntSep, L.EndAction]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [Sep]]
+  , tp "Iap3b" (input1 ++ [L.BeginAction] ++ mkN "int k=0" ++ [L.StmntSep, L.EndAction]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep]]
+  , tp "Iap3c" (input1 ++ [L.BeginAction] ++ mkN "int k=0" ++ [L.StmntSep] ++ mkN "k++" ++ [L.StmntSep, L.EndAction]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, CodeBlock "k++", Sep]]
+  , tp "Iap3d" (input1 ++ [L.BeginAction] ++ mkN "int k=0" ++ [L.StmntSep, L.Reply, L.sp, L.Id "B", L.BeginParamList] ++ mkN "i)" ++ [L.StmntSep, L.EndAction]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, Reply{sp1=" ", rmsgT="B", sp2="", paramCode="i)"}]]
+  , tp "Iap3e" (input1 ++ [L.BeginAction] ++ mkN "int k=0" ++ [L.StmntSep, L.Send, L.sp, L.Id "B", L.BeginParamList] ++ mkN "i) " ++ [L.To] ++ mkN " 5" ++ [L.StmntSep, L.EndAction]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, Send{sp1=" ", smsgT="B", sp2="", paramCode="i) ", toCode=" 5"}]]
+  , tp "Iap3f" (input1 ++ [L.BeginAction] ++ mkN "int k=0" ++ [L.StmntSep, L.Send, L.sp, L.Id "X", L.BeginParamList] ++ mkN "i, (1+1)) " ++ [L.To] ++ mkN " getId(k) + 1" ++ [L.StmntSep, L.EndAction]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, Send{sp1=" ", smsgT="X", sp2="", paramCode="i, (1+1)) ", toCode=" getId(k) + 1"}]]
+  , tp "Iap3g" (input1 ++ [L.BeginAction] ++ mkN "int k=0" ++ [L.StmntSep, L.Send, L.sp, L.Id "B", L.BeginParamList] ++ mkN "i) " ++ [L.To] ++ mkN " 5" ++ [L.StmntSep, L.Reply, L.sp, L.Id "B", L.BeginParamList] ++ mkN "i)" ++ [L.StmntSep, L.EndAction]) $ [IAP (Input {msgT="A", params=[("int", "i")], cond=Nothing}) [CodeBlock "int k=0", Sep, Send{sp1=" ", smsgT="B", sp2="", paramCode="i) ", toCode=" 5"}, Reply{sp1=" ", rmsgT="B", sp2="", paramCode="i)"}]]
+  , tp "B1" (mkN "{List<String> myStrings" ++ [L.StmntSep] ++ mkN "\nmyStrings.add(\"s\")" ++ [L.StmntSep] ++ mkN "}") [NormalCharBlock "{List<String> myStrings", NormalCharBlock S.stmntSep, NormalCharBlock "\nmyStrings.add(\"s\")", NormalCharBlock S.stmntSep, NormalCharBlock "}"]
   ]

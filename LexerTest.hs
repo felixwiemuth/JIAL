@@ -61,12 +61,12 @@ testlist = TestList [
   , tl "C2" " // Line comment\n" $ mkN " "
   , tl "C3" "sth., then: // Line comment\n" $ mkN "sth., then: "
   , tl "C4" "// Line comment with stuff inside /* dsd */ \" \" //\n" $ []
-  , tl "B1a" "{" [BeginBlock 0]
-  , tl "B1b" "}" [EndBlock (-1)]
-  , tl "B2a" "{}" [BeginBlock 0, EndBlock 0]
-  , tl "B2b" "{{}" [BeginBlock 0, BeginBlock 1, EndBlock 1]
-  , tl "B2c" "{{}}" [BeginBlock 0, BeginBlock 1, EndBlock 1, EndBlock 0]
-  , tl "B2d" "{{}}}" [BeginBlock 0, BeginBlock 1, EndBlock 1, EndBlock 0, EndBlock (-1)]
+  , tl "B1a" "{" [BeginTaskBody]
+  -- , tl "B1b" "}" [EndBlock (-1)]
+  , tl "B2a" "{}" [BeginTaskBody, EndTask]
+  , tl "B2b" "{{}" [BeginTaskBody, BeginAction, EndAction]
+  , tl "B2c" "{{}}" [BeginTaskBody, BeginAction, EndAction, EndTask]
+  -- , tl "B2d" "{{}}}" [BeginTaskBody, BeginAction, EndAction, EndTask, EndBlock (-1)]
   , tl "B3a" (cmt "{") []
   , tl "B3b" (cmt "}") []
   , tl "B3c" (cmt "{}") []
@@ -76,9 +76,9 @@ testlist = TestList [
   , tl "Input2a" "_input" $ mkN "_input"
   , tl "Input2b" "input_" $ mkN "input_"
   , tl "Input2c" " input\n" $ mkN " input\n"
-  , tl "IapIn1" "input msgX(int x) {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", EndParamList, sp, BeginBlock 0, EndBlock 0]
-  , tl "IapIn2" "input msgX(int x) when x > 0 {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", EndParamList, sp, BeginWhen] ++ mkN " x > 0 " ++ [BeginBlock 0, EndBlock 0]
-  , tl "IapIn3" "input msgX(int x,  String myS) when x > 0 && s=\"s\" {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", ParamSep, Space "  ", Id "String", sp, Id "myS", EndParamList, sp, BeginWhen] ++ mkN " x > 0 && s=\"s\" " ++ [BeginBlock 0, EndBlock 0]
+  , tl "IapIn1" "input msgX(int x) {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", EndParamList, sp, BeginTaskBody, EndTask]
+  , tl "IapIn2" "input msgX(int x) when x > 0 {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", EndParamList, sp, BeginWhen] ++ mkN " x > 0 " ++ [BeginTaskBody, EndTask]
+  , tl "IapIn3" "input msgX(int x,  String myS) when x > 0 && s=\"s\" {}" $ [BeginInput, sp, Id "msgX", BeginParamList, Id "int", sp, Id "x", ParamSep, Space "  ", Id "String", sp, Id "myS", EndParamList, sp, BeginWhen] ++ mkN " x > 0 && s=\"s\" " ++ [BeginTaskBody, EndTask]
   , tl "Send1a" "send " [Send, sp]
   , tl "Send1b" "\nsend " [NormalChar '\n', Send, sp]
   , tl "Send1c" "\nsend\n" [NormalChar '\n', Send, Space "\n"]
@@ -98,5 +98,5 @@ testlist = TestList [
   , tl "Reply2b" "_reply" $ mkN "_reply"
   , tl "Reply3a" "reply  m((1 + 2), a) ;" $ [Reply, Space "  ", Id "m", BeginParamList] ++ mkN "(1 + 2), a) " ++ [StmntSep]
   , tl "Reply3b" "reply  m ((1 + 2), a) ;" $ [Reply, Space "  ", Id "m", Space " ", BeginParamList] ++ mkN "(1 + 2), a) " ++ [StmntSep]
-  , tl "Iap1" "input A(int i) {reply B(i);}" $ [BeginInput, sp, Id "A", BeginParamList, Id "int", sp, Id "i", EndParamList, sp, BeginBlock 0, Reply, sp, Id "B", BeginParamList] ++ mkN "i)" ++ [StmntSep, EndBlock 0]
+  , tl "Iap1" "input A(int i) {reply B(i);}" $ [BeginInput, sp, Id "A", BeginParamList, Id "int", sp, Id "i", EndParamList, sp, BeginTaskBody, Reply, sp, Id "B", BeginParamList] ++ mkN "i)" ++ [StmntSep, EndTask]
   ]
