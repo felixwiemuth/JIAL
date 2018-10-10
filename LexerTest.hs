@@ -108,4 +108,6 @@ testlist = TestList [
   , tl "F1c" "task  A  { } " [BeginTaskHeader, Space "  ", Id "A", Space "  ", BeginTaskBody, NormalChar ' ', EndTask, NormalChar ' ']
   , tl "F1d" "/*Nothing*/\ntask A {}" [NormalChar '\n', BeginTaskHeader, sp, Id "A", sp, BeginTaskBody, EndTask]
   , tl "F1e" "/*Nothing*/\ntask A {//nothing}\n}" [NormalChar '\n', BeginTaskHeader, sp, Id "A", sp, BeginTaskBody, NormalChar '\n', EndTask]
+  , tl "F1f" "task A{{{}}}" $ [BeginTaskHeader, sp, Id "A", BeginTaskBody, BeginAction] ++ mkN "{}" ++ [EndAction, EndTask]
+  , tl "F1g" "task A{{{{}}}}" $ [BeginTaskHeader, sp, Id "A", BeginTaskBody, BeginAction] ++ mkN "{{}}" ++ [EndAction, EndTask]
   ]
