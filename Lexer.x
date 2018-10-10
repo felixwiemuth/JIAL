@@ -44,7 +44,7 @@ state :-
 <0>  $kp ^ "reply" / @space    { mkTs Reply `andBegin` srp } -- switch to "send/reply" mode
 <0>   \;           { mkTs StmntSep }
 <0>   \"           { mkTs (NormalChar '"') `andBegin` str } -- switch to "string" mode
-<0>   @linecmt     { skip }
+<0>   @linecmt     { mkTs $ NormalChar '\n' } -- line comment ends with a newline
 <0>   "/*"         { enterNewComment `andBegin` cmt } -- switch to "comment" mode
 <0>   \{           { beginBlock }
 <0>   \}           { endBlock }

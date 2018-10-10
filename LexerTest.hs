@@ -58,19 +58,19 @@ testlist = TestList [
   , tl "S5" "\"Hello World String\"" $ mkStr "Hello World String"
   , tl "S6" "/* commented \"String\" */" []
   , tl "S7" "/* commented \"String\" */ and \"string\" " $ mkN " and " ++ mkStr "string" ++ mkN " "
-  , tl "C1" "// Line comment\n" []
-  , tl "C2" " // Line comment\n" $ mkN " "
-  , tl "C3" "sth., then: // Line comment\n" $ mkN "sth., then: "
-  , tl "C4" "// Line comment with stuff inside /* dsd */ \" \" //\n" $ []
+  , tl "C1" "// Line comment\n" [NormalChar '\n']
+  , tl "C2" " // Line comment\n" $ mkN " \n"
+  , tl "C3" "sth., then: // Line comment\n" $ mkN "sth., then: \n"
+  , tl "C4" "// Line comment with stuff inside /* dsd */ \" \" //\n" $ [NormalChar '\n']
   , tl "B1a" "{" [BeginTaskBody]
   -- , tl "B1b" "}" [EndBlock (-1)]
   , tl "B2a" "{}" [BeginTaskBody, EndTask]
   , tl "B2b" "{{}" [BeginTaskBody, BeginAction, EndAction]
   , tl "B2c" "{{}}" [BeginTaskBody, BeginAction, EndAction, EndTask]
   -- , tl "B2d" "{{}}}" [BeginTaskBody, BeginAction, EndAction, EndTask, EndBlock (-1)]
-  , tl "B3a" (cmt "{") []
-  , tl "B3b" (cmt "}") []
-  , tl "B3c" (cmt "{}") []
+  , tl "B3a" (cmt "{") [NormalChar '\n']
+  , tl "B3b" (cmt "}") [NormalChar '\n']
+  , tl "B3c" (cmt "{}") [NormalChar '\n']
   -- Input-Action-pairs, reply/send
   , tl "When1" "input when true" $ [BeginInput, sp, BeginWhen] ++ mkN " true"
   , tl "Input1a" "input " [BeginInput, sp]
@@ -103,7 +103,9 @@ testlist = TestList [
   , tl "Reply3b" "reply  m ((1 + 2), a) ;" $ [Reply, Space "  ", Id "m", Space " ", BeginParamList] ++ mkN "(1 + 2), a) " ++ [StmntSep]
   , tl "Iap1" "input A(int i) {reply B(i);}" $ [BeginInput, sp, Id "A", BeginParamList, Id "int", sp, Id "i", EndParamList, sp, BeginTaskBody, Reply, sp, Id "B", BeginParamList] ++ mkN "i)" ++ [StmntSep, EndTask]
   -- File format
-  , tl "F1" "task A {}" [BeginTaskHeader, sp, Id "A", sp, BeginTaskBody, EndTask]
-  , tl "F2" "\ntask A {}" [NormalChar '\n', BeginTaskHeader, sp, Id "A", sp, BeginTaskBody, EndTask]
-  , tl "F3" "task  A  { } " [BeginTaskHeader, Space "  ", Id "A", Space "  ", BeginTaskBody, NormalChar ' ', EndTask, NormalChar ' ']
+  , tl "F1a" "task A {}" [BeginTaskHeader, sp, Id "A", sp, BeginTaskBody, EndTask]
+  , tl "F1b" "\ntask A {}" [NormalChar '\n', BeginTaskHeader, sp, Id "A", sp, BeginTaskBody, EndTask]
+  , tl "F1c" "task  A  { } " [BeginTaskHeader, Space "  ", Id "A", Space "  ", BeginTaskBody, NormalChar ' ', EndTask, NormalChar ' ']
+  , tl "F1d" "/*Nothing*/\ntask A {}" [NormalChar '\n', BeginTaskHeader, sp, Id "A", sp, BeginTaskBody, EndTask]
+  , tl "F1e" "/*Nothing*/\ntask A {//nothing}\n}" [NormalChar '\n', BeginTaskHeader, sp, Id "A", sp, BeginTaskBody, NormalChar '\n', EndTask]
   ]
