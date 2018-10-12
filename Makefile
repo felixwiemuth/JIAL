@@ -32,5 +32,8 @@ mtest: MTest.hs Lexer.hs Parser.hs
 analysis: Analysis.hs
 	$(cmd) Analysis.hs
 
+atest: AnalysisTest.hs
+	runhaskell AnalysisTest.hs
+
 clean:
 	rm Main Lexer.hs Parser.hs *.o *.hi
