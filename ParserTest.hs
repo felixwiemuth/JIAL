@@ -1,10 +1,11 @@
 module ParserTest where
 
+import Test.HUnit
+
 import qualified Lexer as L
 import Parser
 import qualified LexerTest as L
 import qualified Symbols as S
-import Test.HUnit
 
 
 -- mkParseTestCase :: [Token] -> Either String Task -> (Task -> Assertion) -> Test
