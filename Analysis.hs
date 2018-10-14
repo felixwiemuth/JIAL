@@ -1,13 +1,51 @@
 module Analysis where
 
-import Data.Maybe
 import Control.Monad
+import Data.Graph
+import Data.List
+import Data.Maybe
 
 import Parser
 
 -- The representation of IAPs used in the message type graph
 data GIAP = GIAP { task :: String, gmsgT :: String, gcond :: Maybe String }
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)
+
+-- Short display version of a GIAP
+printGIAP :: GIAP -> String
+printGIAP x = task x ++ "." ++ gmsgT x ++ condPart
+  where condPart = case gcond x of
+          Nothing -> ""
+          Just c -> "(" ++ c ++ ")"
+
+getSCCs :: [Task] -> [[GIAP]]
+getSCCs tasks = map flattenSCC $ stronglyConnComp $ makeMSGTGraphEdges tasks
+
+printGIAPList :: [GIAP] -> String
+printGIAPList = intercalate ", " . map printGIAP
+
+-- printSCCs :: [Task] -> String
+-- printSCCs tasks = -- replace "," ", " .
+--   filter (/= '"') . show . map (map printGIAP) $ getSCCs tasks
+
+getCyclicSCCs :: [Task] -> [[GIAP]]
+getCyclicSCCs tasks = filter ((> 1) . length) $ getSCCs tasks
+
+-- printCyclicSCCs :: [Task] -> String
+-- printCyclicSCCs tasks = filter (/= '"') . show . map (map printGIAP) $ getCyclicSCCs tasks
+
+makeMSGTGraph :: [Task] -> (Graph, Vertex -> (GIAP, GIAP, [GIAP]), GIAP -> Maybe Vertex)
+makeMSGTGraph tasks = graphFromEdges $ makeMSGTGraphEdges tasks
+  -- edges = [(giap, giap, sendsTo) |
+  --           (giap, canSendMsgTs) <- getGIAPsFromTasks tasks,
+  --           let sendsTo = [giap' | (giap', _) <- getGIAPsFromTasks tasks, (gmsgT giap') `elem` canSendMsgTs] ]
+
+makeMSGTGraphEdges :: [Task] -> [(GIAP, GIAP, [GIAP])]
+makeMSGTGraphEdges tasks =
+  [(giap, giap, sendsTo) |
+    (giap, canSendMsgTs) <- getGIAPsFromTasks tasks,
+    let sendsTo = [giap' | (giap', _) <- getGIAPsFromTasks tasks, (gmsgT giap') `elem` canSendMsgTs] ]
+
 
 -- For a list of Tasks, get a list of the corresponding GIAPs, each together with a list of message types they can send (syntactically, i.e., they include a send or reply statement with that message type)
 getGIAPsFromTasks :: [Task] -> [(GIAP, [String])]
@@ -19,7 +57,7 @@ getGIAPsFromTasks = join . map getGIAPsFromTask
 --                                       in map (\(n, acTs) -> (name t ++ "." ++ n, acTs)) iaps))
 
 -- getGIAPsFromTask :: Task -> [GIAP]
--- getGIAPsFromTask t = 
+-- getGIAPsFromTask t =
 
 getGIAPsFromTask :: Task -> [(GIAP, [String])]
 getGIAPsFromTask task = catMaybes $ map (extractIAP $ name task) (elements task)
