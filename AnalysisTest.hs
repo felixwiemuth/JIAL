@@ -17,9 +17,13 @@ iap inputType sendTypes = IAP (Input {msgT = inputType, params = [], cond = Noth
 
 -- Test tasks
 t = Task { prelude = "", name = "", elements = [], epilogue = "" }
-t1 = t { name="A", elements=[iap "a" ["b", "c"]] }
-t2 = t { name="B", elements=[iap "b" ["c", "d"]] }
-t3 = t { name="C", elements=[iap "c" ["a", "b"]] }
+tA = t { name="A", elements=[iap "a" ["b", "c"]] }
+tB = t { name="B", elements=[iap "b" ["c", "d"]] }
+tC = t { name="C", elements=[iap "c" ["a", "b"]] }
+tD = t { name="D", elements=[iap "d" ["e1", "e2"]] }
+tE = t { name="E", elements=[iap "e1" ["a"], iap "e2" ["c", "d"]] }
+tS = t { name="S", elements=[iap "self" ["self"]] }
+
 
 
 -- "IAP" test: test correct extraction of IAP information from a list of tasks
@@ -37,20 +41,23 @@ main = runTestTT testlist
 testlist :: Test
 testlist = TestList
   [
-    it "T1" [t1] [(GIAP{task="A", gmsgT="a", gcond=Nothing}, ["b", "c"])]
+    it "T1" [tA] [(GIAP{task="A", gmsgT="a", gcond=Nothing}, ["b", "c"])]
   , st "S1" [] []
-  , st "S2a" [t1] []
-  , st "S2b" [t2] []
-  , st "S3a" [t1, t1] []
-  , st "S4a" [t1, t2] []
-  , st "S4b" [t1, t3] ["A.a, C.c"]
-  , st "S4c" [t1, t2, t3] ["A.a, B.b, C.c"]
+  , st "S2a" [tA] []
+  , st "S2b" [tB] []
+  , st "S3a" [tA, tA] []
+  , st "S4a" [tA, tB] []
+  , st "S4b" [tA, tC] ["A.a, C.c"]
+  , st "S4c" [tB, tC] ["B.b, C.c"]
+  , st "S4d" [tA, tB, tC] ["A.a, B.b, C.c"]
+  , st "S4e" [tB, tC, tD, tE] ["B.b, C.c, D.d, E.e2"] -- todo want that one is not included
+  , st "S5" [tS] ["S.self"]
   ]
 
 
 -- SCCs work!
 
-tasks = [t1, t2]
+tasks = [tA, tB]
 
 edges = [(giap, giap, sendsTo) |
           (giap, canSendMsgTs) <- getGIAPsFromTasks tasks,

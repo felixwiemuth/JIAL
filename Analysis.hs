@@ -18,8 +18,13 @@ printGIAP x = task x ++ "." ++ gmsgT x ++ condPart
           Nothing -> ""
           Just c -> "(" ++ c ++ ")"
 
-getSCCs :: [Task] -> [[GIAP]]
-getSCCs tasks = map flattenSCC $ stronglyConnComp $ makeMSGTGraphEdges tasks
+getCyclicSCCs :: [Task] -> [[GIAP]]
+getCyclicSCCs tasks =
+  let edges = makeMSGTGraphEdges tasks
+      cyclicSCCs = filter (\s -> case s of
+                                   CyclicSCC _ -> True
+                                   AcyclicSCC _ -> False) (stronglyConnComp edges)
+  in map flattenSCC cyclicSCCs
 
 printGIAPList :: [GIAP] -> String
 printGIAPList = intercalate ", " . map printGIAP
@@ -27,9 +32,6 @@ printGIAPList = intercalate ", " . map printGIAP
 -- printSCCs :: [Task] -> String
 -- printSCCs tasks = -- replace "," ", " .
 --   filter (/= '"') . show . map (map printGIAP) $ getSCCs tasks
-
-getCyclicSCCs :: [Task] -> [[GIAP]]
-getCyclicSCCs tasks = filter ((> 1) . length) $ getSCCs tasks
 
 -- printCyclicSCCs :: [Task] -> String
 -- printCyclicSCCs tasks = filter (/= '"') . show . map (map printGIAP) $ getCyclicSCCs tasks
