@@ -29,6 +29,9 @@ getCyclicSCCs tasks =
 printGIAPList :: [GIAP] -> String
 printGIAPList = intercalate ", " . map printGIAP
 
+showCyclicSCCs :: [Task] -> String
+showCyclicSCCs = intercalate ", " . map (\s -> "[" ++ s ++ "]") . map printGIAPList . getCyclicSCCs
+
 -- printSCCs :: [Task] -> String
 -- printSCCs tasks = -- replace "," ", " .
 --   filter (/= '"') . show . map (map printGIAP) $ getSCCs tasks
