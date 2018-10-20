@@ -1,0 +1,16 @@
+task P {
+  boolean canCommit = true;
+  boolean committed = false;
+
+  input vote_request() {
+    reply vote(canCommit);
+  }
+
+  input commit() {
+    committed = true;
+  }
+  
+  input abort() {
+    committed = false;
+  }
+}

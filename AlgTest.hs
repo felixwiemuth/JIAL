@@ -12,9 +12,9 @@ import Frontend
 -- Paramters: Task name, amount to create of that task, a list of boolean Java expressions in the scope of the task to be checked after termination (at all instances of this task)
 type TaskTestConfig = (String, Int, [String])
 
--- Result test: test the tasks' state after termination of the algorithm
-rt :: [TaskTestConfig] -> [String] -> IO Test
-rt configs expectedCycles =
+-- Result test: test the tasks' state after termination of the algorithm (not implemented yet)
+rt :: String -> [TaskTestConfig] -> IO Test
+rt name configs =
   -- let includedTasks
       -- taskConfigs = map (\name amount _ _ -> (name, amount)) cs
       -- javaAssertions = map (\name)
@@ -47,5 +47,9 @@ testlist :: [IO Test]
 testlist =
   [
     ct "1" ["A"] []
+  , rt "1" [("A", 1, [])]
   , ct "2" ["A", "B"] ["A.a, B.b"]
+  , rt "2" [("A", 1, []), ("B", 1, [])]
+  , ct "2PC" ["2pcC", "2pcP"] []
+  , rt "2PC" [("2pcC", 1, ["result == true"]), ("2pcP", 3, ["committed == true"])]
   ]
