@@ -26,7 +26,6 @@ rt name configs =
 --   let tasks
 
 
-
 -- Cyclicity test: test the cycles in an algorithm used by the termination analysis (it suffices to provide each task name once)
 -- 1st parameter: test name
 -- 2nd parameter: file names of tasks to add to algorithm
@@ -35,7 +34,7 @@ ct :: String -> [String] -> [String] -> IO Test
 ct name files expectedCycles =
   do tasks <- makeALGFromFiles (map ("alg/"++) files) -- in IO monad
      return $ case tasks of
-       Left err -> TestCase $ assertEqual "Parsing" True False -- NOTE: will not occur as long as program crashes because of parse errors
+       Left err -> TestCase $ assertEqual "Parsing" True False -- NOTE: will not occur as long as program crashes when parse errors occur
        Right ts -> st name ts expectedCycles
 
 
