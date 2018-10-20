@@ -1,0 +1,5 @@
+task B {
+  input b() {
+    send a() to A;
+  }
+}

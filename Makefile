@@ -35,5 +35,8 @@ analysis: Analysis.hs
 atest: AnalysisTest.hs
 	runhaskell AnalysisTest.hs
 
+algtest:
+	runhaskell AlgTest.hs
+
 clean:
 	rm Main Lexer.hs Parser.hs *.o *.hi

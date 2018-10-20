@@ -6,6 +6,7 @@ import Data.List
 import Data.Maybe
 
 import Parser
+import Util
 
 -- The representation of IAPs used in the message type graph
 data GIAP = GIAP { task :: String, gmsgT :: String, gcond :: Maybe String }
@@ -16,7 +17,7 @@ printGIAP :: GIAP -> String
 printGIAP x = task x ++ "." ++ gmsgT x ++ condPart
   where condPart = case gcond x of
           Nothing -> ""
-          Just c -> "(" ++ c ++ ")"
+          Just c -> "(" ++ trim c ++ ")"
 
 getCyclicSCCs :: [Task] -> [[GIAP]]
 getCyclicSCCs tasks =

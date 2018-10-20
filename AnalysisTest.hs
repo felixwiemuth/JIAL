@@ -23,6 +23,7 @@ tC = t { name="C", elements=[iap "c" ["a", "b"]] }
 tD = t { name="D", elements=[iap "d" ["e1", "e2"]] }
 tE = t { name="E", elements=[iap "e1" ["a"], iap "e2" ["c", "d"]] }
 tS = t { name="S", elements=[iap "self" ["self"]] }
+-- tW = t { name="W", elements=[IAP (Input {msgT = "q", params=[("int", "a")], cond = Just "  a == 3\n"}) [Send{smsgT="q", paramCode="", toCode=""}]]}
 
 
 
@@ -52,6 +53,7 @@ testlist = TestList
   , st "S4d" [tA, tB, tC] ["A.a, B.b, C.c"]
   , st "S4e" [tB, tC, tD, tE] ["B.b, C.c, D.d, E.e2"] -- todo want that one is not included
   , st "S5" [tS] ["S.self"]
+  -- , st "S6" [tW] [""]
   ]
 
 

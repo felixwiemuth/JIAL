@@ -1,0 +1,5 @@
+task A {
+  input a() {
+    send b() to ALL;
+  }
+}
