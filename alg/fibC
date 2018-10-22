@@ -1,0 +1,21 @@
+task C {
+  int n = 3;
+  int res = 0;
+
+  input init() {
+    if (n > 0) {
+      send iterate() to P;
+      n--;
+    }
+  }
+
+  input result(int val) {
+    res = val;
+
+    if (n > 0) {
+      send iterate() to P;
+      n--;
+    }
+  }
+
+}

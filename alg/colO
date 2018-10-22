@@ -1,0 +1,21 @@
+task O {
+  int steps = 0;
+
+  input perform(int n) {
+    if (n % 2 != 0) {
+      n = 3n+1;
+      steps++;
+    }
+    if (n != 1) {
+      send perform(n) to E;
+    } else {
+      send result(steps) to E;
+    }
+  }
+
+  input result(int s) {
+    steps = steps + s;
+    send result(steps) to I;
+  }
+
+}

@@ -1,0 +1,17 @@
+task I {
+  int n = 27;
+  int steps = 0;
+
+  input init() {
+    if (n % 2 == 0) {
+      send perform(n) to E;
+    } else {
+      send perform(n) to O;
+    }
+  }
+
+  input result(int s) {
+    steps = s;
+  }
+
+}

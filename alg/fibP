@@ -1,0 +1,12 @@
+task P {
+  int a = 1;
+  int b = 1;
+  int c = 1;
+
+  input iterate() {
+    c = a;
+    a = b;
+    b = a+c;
+    reply result(a);
+  }
+}

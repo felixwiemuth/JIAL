@@ -51,4 +51,8 @@ testlist =
   , rt "2" [("A", 1, []), ("B", 1, [])]
   , ct "2PC" ["2pcC", "2pcP"] []
   , rt "2PC" [("2pcC", 1, ["result == true"]), ("2pcP", 3, ["committed == true"])]
+  , ct "Fib" ["fibC","fibP"] []
+  , rt "Fib" [("fibC", 1, ["n == 0", "res == 2"]), ("fibP", 1, ["a == 2"])]
+  , ct "Col" ["colI","colE","colO"] []
+  , rt "Col" [("colI", 1, ["steps == 111"]), ("colE", 1, []), ("colO", 1, [])]
   ]
