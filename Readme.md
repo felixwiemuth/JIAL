@@ -43,4 +43,4 @@ Im folgenden werden die Formate für die zwei Testsarten erklärt, Beispiele sin
 - `testConfigs :: [TestConfig]`: Liste von Testkonfigurationen, wobei `testConfig = (taskName, amount, checks) :: (String, Int, [String])`, was `amount` viele Instanzen der Task `taskName` (Name der Task, nicht der Datei) zum Algorithmus hinzufügt, mit einer Liste `checks` von Bool'schen Java-Ausdrücken (als String) im Scope der jeweiligen Task.
 
 #### Ausführen der Tests
-Falls haskell und HUnit installiert sind, kann der test mit `make algtest` gestartet werden.
+Falls haskell und HUnit installiert sind, kann der Test mit `make algtest` gestartet werden.
