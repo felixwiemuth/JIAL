@@ -1,4 +1,8 @@
-task O {
+/**
+ * Odd step in Collatz calculation.
+ * @author Anton Pirogov
+ */
+task Odd {
   int steps = 0;
 
   input perform(int n) {
@@ -7,15 +11,15 @@ task O {
       steps++;
     }
     if (n != 1) {
-      send perform(n) to E;
+      send perform(n) to $Even;
     } else {
-      send result(steps) to E;
+      send result(steps) to $Even;
     }
   }
 
   input result(int s) {
     steps = steps + s;
-    send result(steps) to I;
+    send result(steps) to $I;
   }
 
 }

@@ -1,3 +1,7 @@
+/**
+ * Participant in Fibonacci calculation.
+ * @author Anton Pirogov
+ */
 task P {
   int a = 1;
   int b = 1;

@@ -1,4 +1,8 @@
-task E {
+/**
+ * Even step in Collatz calculation.
+ * @author Anton Pirogov
+ */
+task Even {
   int steps = 0;
 
   input perform(int n) {
@@ -7,15 +11,15 @@ task E {
       steps++;
     }
     if (n != 1) {
-      send perform(n) to O;
+      send perform(n) to $Odd;
     } else {
-      send result(steps) to O;
+      send result(steps) to $Odd;
     }
   }
 
   input result(int s) {
     steps = steps + s;
-    send result(steps) to I;
+    send result(steps) to $I;
   }
 
 }

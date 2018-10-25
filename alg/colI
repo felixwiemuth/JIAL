@@ -1,12 +1,16 @@
+/**
+ * Coordinator in Collatz calculation.
+ * @author Anton Pirogov
+ */
 task I {
   int n = 27;
   int steps = 0;
 
   input init() {
     if (n % 2 == 0) {
-      send perform(n) to E;
+      send perform(n) to $Even;
     } else {
-      send perform(n) to O;
+      send perform(n) to $Odd;
     }
   }
 
