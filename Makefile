@@ -38,5 +38,8 @@ atest: AnalysisTest.hs
 algtest:
 	runhaskell AlgTest.hs
 
+ctest: CodeGeneratorTest.hs
+	runhaskell CodeGeneratorTest.hs
+
 clean:
 	rm Main Lexer.hs Parser.hs *.o *.hi
