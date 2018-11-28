@@ -12,22 +12,13 @@ import Control.Monad
 
 $all        = [\x00-\x10ffff]
 $w          = [\ \t\b]
-$wn         = [\ \t\b\n]
 $digit      = 0-9                                            -- digits
 $alpha      = [A-Za-z]
-$letter     = [a-zA-Z]                                       -- alphabetic characters
-$ident      = [$letter $digit _]                             -- identifier character
 
-
-$normalchar = $all # [\" \{ \} \;] -- all but single control characters
-$whenchar = $all # [\{]
 $endoflinecmt = [\n]
 $allbutn = $all # [\n]
-$kp = [$wn \{] -- keyword prefix
 
-@number     = [$digit]+
 @identifier = $alpha($alpha|_|$digit)*
-@space      = [$wn]+  -- space including newline
 
 @linecmt = "//"(.)*$endoflinecmt
 
@@ -47,9 +38,10 @@ state :-
 <0>   "/*"          { enterNewComment `andBegin` cmt } -- switch to "comment" mode
 -- Everything else is the definition of a message type
 <0>   @identifier   { mkTstr MsgTypeName `andBegin` m } -- switch to "message type" mode
+<0>   \n            { skip }
 
 -- Parse the parameter list of a message type definition
-<m>   @space        { skip }
+<m>   $w            { skip }
 <m>   @identifier   { mkTstr Id }
 <m>   \(            { skip }
 <m>   \)            { skip }
