@@ -37,7 +37,8 @@ The exact format parsed is:
 A message type definition starts with a valid Java identifier and is followed by further identifiers, separated by whitespaces, parentheses and/or commas.
 The preferred way of specifying a message type is: `msg_name(ParameterType1, ParamterType2, ...)`
 
-
+### Message type class format
+- Each parameter is named `pN` where N is the number of the parameter
 
 
 ## Unit Test instructions (German)

@@ -5,10 +5,11 @@ import System.Environment
 import qualified Lexer as Lexer
 import qualified MsgTypeLexer as MsgTypeLexer
 import qualified Parser as Parser
+import qualified CodeGenerator as CG
 
 
 main = do
-  putStrLn "Command is \"p\" - available commands: l, p, lp, lf, m, mf"
+  putStrLn "Command is \"p\" - available commands: l, p, lp, lf, m, mf, mc (f = read from file, c = compile file to file out)"
   loop "p"
 
 loop cmd = do
@@ -27,6 +28,9 @@ loop cmd = do
     "mf" -> do
       putStrLn "Switched to message type file lexer"
       loop "mf"
+    "mc" -> do
+      putStrLn "Switched to message type file compiler"
+      loop "mc"
     "p" -> do
       putStrLn "Switched to parser"
       loop "p"
@@ -48,6 +52,13 @@ loop cmd = do
                 f <- readFile line
                 let tokens = MsgTypeLexer.scanner f
                 putStrLn $ show tokens
+                return ()
+        "mc" -> do
+                f <- readFile line
+                let tokens = MsgTypeLexer.scanner f
+                case tokens of
+                  Left err -> putStrLn err
+                  Right ts -> writeFile "M.java" $ CG.makeMsgTypeFile ts
                 return ()
         _ -> putStrLn $ runCmd cmd line
       loop cmd
