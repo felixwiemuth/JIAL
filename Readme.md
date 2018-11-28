@@ -1,6 +1,46 @@
-# Unit Tests
+# JIAL compiler
 
-## Testanleitung
+## Short instructions
+
+### Implementing an algorithm
+To implement a distributed algorithm in JIAL, proceed as follows.
+
+#### Define message types
+Define all message types to be used by the algorithm in a file `messages.jialm` in the following format:
+
+```
+package mypackage.example;
+
+import mypackage.example.MyClassA;
+import mypackage.example.MyClassB;
+...
+
+msgtype1()
+msgtype2(int)
+msgtype3(MyClassA, int)
+msgtype4(String, MyClassA, MyClassB)
+...
+```
+
+
+
+
+## Technical Documentation
+
+
+### Message type file format
+The exact format parsed is:
+- A line starting with `package ` or `import ` is added to the resulting class' header
+- Comments are ignored
+- A line starting otherwise is interpreted as message type definition
+
+A message type definition starts with a valid Java identifier and is followed by further identifiers, separated by whitespaces, parentheses and/or commas.
+The preferred way of specifying a message type is: `msg_name(ParameterType1, ParamterType2, ...)`
+
+
+
+
+## Unit Test instructions (German)
 
 ### Ziel des Tests
 In diesem Test sollen Außenstehende einfache, selbstgewählte Algorithmen in der Input/Action-Sprache implementieren.

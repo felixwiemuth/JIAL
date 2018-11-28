@@ -9,6 +9,9 @@ lexer: Lexer.hs
 Lexer.hs: Lexer.x
 	alex Lexer.x
 
+MsgTypeLexer.hs: MsgTypeLexer.x
+	alex MsgTypeLexer.x
+
 Parser.hs: Parser.y Lexer.hs
 	happy Parser.y
 
@@ -26,7 +29,7 @@ test: LexerTest.hs ParserTest.hs
 	runhaskell LexerTest
 	runhaskell ParserTest
 
-mtest: MTest.hs Lexer.hs Parser.hs
+mtest: MTest.hs Lexer.hs Parser.hs MsgTypeLexer.hs
 	runhaskell MTest
 
 analysis: Analysis.hs
