@@ -36,8 +36,8 @@ id { L.Id $$ }
 %%
 
 Task :: { Task }
-Task : NormalCharList beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask NormalCharList { Task { prelude = $1, name = $4, elements = reverse $7, epilogue = $9 } }
-     | beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask NormalCharList { Task { prelude = "", name = $3, elements = reverse $6, epilogue = $8 } }
+Task : NormalCharList beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask MaybeNormalCharList { Task { prelude = $1, name = $4, elements = reverse $7, epilogue = $9 } }
+     | beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask MaybeNormalCharList { Task { prelude = "", name = $3, elements = reverse $6, epilogue = $8 } }
 
 TaskElemList : {- empty -} { [] }
              | TaskElemList TaskElem { $2:$1  }
@@ -58,6 +58,10 @@ NormalCharList_ :: { String }
 NormalCharList_ : normalChar { [$1] }
                 -- | beginString StringCharList endString {  } -- If want to deal with Strings here
                 | NormalCharList_ normalChar { $2:$1 }
+
+MaybeNormalCharList :: { String }
+MaybeNormalCharList : {- empty -} { "" }
+                    | NormalCharList { $1 }
 
 IAP :: { TaskElem }
 IAP : beginInput Input Action { IAP $2 $3 }
