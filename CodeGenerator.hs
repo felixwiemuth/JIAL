@@ -9,6 +9,12 @@ import qualified MsgTypeLexer as L
 
 -- Generate the message type definition class M from a given message type definition
 
+libPkg = "ial.base."
+
+importMsg = "import " ++ libPkg ++ "Message;\n"
+importTask = "import " ++ libPkg ++ "Task;\n"
+importSet = "import java.util.Set;\n"
+
 mtfBegin = "public class M {"
 mtfEnd = "\n}"
 mtfClassBegin1 = "\n\n    public static class "
@@ -56,6 +62,94 @@ completeCurrentClass paramCnt ctorHead ctorBody =
             if paramCnt == 1
             then ctorHead
             else take (length ctorHead - 2) ctorHead -- Remove trailing ", "
+
+
+-- Generate a task class from a Task
+
+-- Indents
+indent = "    "
+indent2 = indent ++ indent
+indent3 = indent2 ++ indent
+indent4 = indent3 ++ indent
+tfClassBegin = "\npublic class "
+tfDestVar = indent ++ "private Set<Integer> $"
+-- Guard and action methods
+tfMsgParam = "(Message _m)"
+tfVarMsgSrc = "int $src = _m.getSrc();\n"
+-- Guard method
+tfGuardMBegin = "public boolean " -- Needs no indent as takes it from source
+tfGuardMName = "$Guard"
+tfMSep = "\n\n"
+-- Action method
+tfActionMBegin = "public void " -- Needs no indent as takes it from source
+tfActionMName = "$Action"
+tfPname = "p"
+tfMsgStart = indent2 ++ "{\n" ++ indent3 ++ "Message m_ = new M."
+tfMsgSetSrc = indent3 ++ "m_.setSrc($ID);\n"
+tfMsgSetDest = indent3 ++ "m_.setDest("
+tfMsgEnd = indent3 ++ "send(m_);\n" ++ indent2 ++ "}\n"
+tfReplyDestCode = "$src"
+
+-- Generates a Java class file from a Task
+-- taskNames: names of the tasks for which destination ID sets should be generated
+makeTaskFile :: Task -> [String] -> (String, String)
+makeTaskFile t taskNames = ((name t) ++ ".java",
+  (prelude t)
+  ++ importSet
+  ++ importTask
+  ++ importMsg
+  ++ tfClassBegin ++ (name t) ++ " extends Task {\n"
+  ++ concat (map (\name -> tfDestVar ++ name ++ ";\n") taskNames)
+  ++ concat (map generateTaskElement (elements t))
+  ++ "\n}"
+  )
+
+generateTaskElement :: TaskElem -> String
+generateTaskElement e =
+  case e of
+    NormalCharBlock s -> s
+    StmntSep -> ";"
+    IAP input actionElements -> let varBlock = generateVarBlock (msgT input) (params input) in
+      tfGuardMBegin ++ (msgT input) ++ tfGuardMName ++ tfMsgParam ++ " {\n"
+      ++ varBlock
+      ++ generateGuardExp (cond input) ++ "\n" ++ indent ++ "}"
+      ++ tfMSep ++ indent
+      ++ tfActionMBegin ++ (msgT input) ++ tfActionMName ++ tfMsgParam ++ " {\n"
+      ++ varBlock
+      ++ concat (map generateActionElement actionElements) ++ "\n" ++ indent ++ "}"
+
+generateVarBlock msgType params =
+  indent2 ++ tfVarMsgSrc
+  ++ generateMsgParamVars msgType params
+
+generateMsgParamVars :: String -> [(String, String)] -> String
+generateMsgParamVars msgType params = intercalate "\n" (map (generateMsgParamVar msgType) (zip params [1..])) ++ "\n"
+
+generateMsgParamVar :: String -> ((String, String), Integer) -> String
+generateMsgParamVar msgType ((t,v),n) =
+  indent2 ++ t ++ " " ++ v ++  " = " ++ " ((" ++ "M." ++ msgType ++ ") _m)." ++ tfPname ++ (show n) ++";"
+
+
+generateGuardExp :: Maybe String -> String
+generateGuardExp e = indent ++ indent ++ "return " ++ (fromMaybe "true" e) ++ ";"
+
+generateActionElement :: ActionElem -> String
+generateActionElement e =
+  case e of
+    CodeBlock s -> s
+    Sep -> ";"
+    Reply {rmsgT=msgType, paramCode=pCode} -> generateSend msgType pCode tfReplyDestCode
+    Send {smsgT=msgType, paramCode=pCode, toCode=destCode} -> generateSend msgType pCode destCode
+
+generateSend :: String -> String -> String -> String
+generateSend msgType paramCode destCode =
+  "\n" ++ tfMsgStart ++ msgType ++ "(" ++ paramCode ++ ";\n"
+  ++ tfMsgSetSrc
+  ++ tfMsgSetDest ++ destCode ++ ");\n"
+  ++ tfMsgEnd
+
+makeParamList :: [(String, String)] -> String
+makeParamList ps = "(" ++ intercalate ", " (map (\(t,v) -> t ++ " " ++ v) ps)  ++ ")"
 
 -------------------------------------------------
 -- Extract all message types from a list of tasks

@@ -36,8 +36,8 @@ id { L.Id $$ }
 %%
 
 Task :: { Task }
-Task : NormalCharList beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask MaybeNormalCharList { Task { prelude = $1, name = $4, elements = reverse $7, epilogue = $9 } }
-     | beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask MaybeNormalCharList { Task { prelude = "", name = $3, elements = reverse $6, epilogue = $8 } }
+Task : Prelude beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask MaybeNormalCharList { Task { prelude = $1, name = $4, elements = reverse $7, epilogue = $9 } }
+     | beginTaskHeader Sp id Sp beginTaskBody TaskElemList endTask MaybeNormalCharList { Task { prelude = "", name = $3, elements = reverse $6, epilogue = $8 } } -- TODO make just "MaybePrelude"?
 
 TaskElemList : {- empty -} { [] }
              | TaskElemList TaskElem { $2:$1  }
@@ -50,6 +50,15 @@ TaskElem : -- beginString StringCharList endString { TString $ reverse $2 }
 -- StringCharList :: { String }
 -- StringCharList : {- empty -} { [] }
 --                | StringCharList stringChar { $2:$1 }
+
+Prelude :: { String }
+Prelude : Prelude_ { reverse $1 }
+
+Prelude_ :: { String }
+Prelude_ : normalChar { [$1] }
+         | stmntSep   { [';'] }
+         | Prelude_ normalChar { $2:$1 }
+         | Prelude_ stmntSep { ';':$1 }
 
 NormalCharList :: { String }
 NormalCharList : NormalCharList_ { reverse $1 }

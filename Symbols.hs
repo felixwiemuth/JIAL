@@ -1,6 +1,6 @@
 module Symbols where
 
-stmntSep = ";"
+stmntSep = ";" -- NOTE: ';' also used in code
 -- beginBlock = "{" -- entered manually
 -- endBlock = "}"
 -- beginString = "\""

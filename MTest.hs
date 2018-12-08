@@ -9,7 +9,7 @@ import qualified CodeGenerator as CG
 
 
 main = do
-  putStrLn "Command is \"p\" - available commands: l, p, lp, lf, m, mf, mc (f = read from file, c = compile file to file out)"
+  putStrLn "Command is \"p\" - available commands: l, p, lp, lf, m, mf, mc, tc (f = read from file, c = compile file to file)"
   loop "p"
 
 loop cmd = do
@@ -29,8 +29,11 @@ loop cmd = do
       putStrLn "Switched to message type file lexer"
       loop "mf"
     "mc" -> do
-      putStrLn "Switched to message type file compiler"
+      putStrLn "Switched to message type file compiler (output: M.java)"
       loop "mc"
+    "tc" -> do
+      putStrLn "Switched to task compiler (output: <name>.java)"
+      loop "tc"
     "p" -> do
       putStrLn "Switched to parser"
       loop "p"
@@ -59,6 +62,16 @@ loop cmd = do
                 case tokens of
                   Left err -> putStrLn err
                   Right ts -> writeFile "M.java" $ CG.makeMsgTypeFile ts
+                return ()
+        "tc" -> do
+                f <- readFile line
+                let tokens = Lexer.scanner f
+                case tokens of
+                  Left err -> putStrLn err
+                  Right ts ->
+                    let task = Parser.parse ts
+                        (filename, content) = CG.makeTaskFile task [Parser.name task]
+                    in  writeFile filename content
                 return ()
         _ -> putStrLn $ runCmd cmd line
       loop cmd
