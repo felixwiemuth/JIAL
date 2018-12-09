@@ -170,7 +170,7 @@ generatePrepareMethod taskNames msgTypes =
   tfPrepareStart
   ++ concat (map makeDestVarInit taskNames)
   ++ concat (map makeAddIAP msgTypes)
-  ++ indent2 ++ "}\n"
+  ++ indent ++ "}\n"
 
 makeDestVarInit :: String -> String
 makeDestVarInit name = indent2 ++ "$" ++ name ++ " = " ++ tfPrepareGetGroup ++ "(\"" ++ name ++ "\");\n"
