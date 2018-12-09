@@ -5,6 +5,7 @@ import Data.Either
 import qualified Lexer as Lexer
 import Parser
 import Analysis
+import qualified CodeGenerator as CG
 
 
 makeALGFromFiles :: [String] -> IO (Either String [Task])
@@ -15,6 +16,19 @@ makeALGFromFiles files =
           then return $ Right $ rights tasks
           else return $ Left "Error" -- TODO zip with task names, remove non-errors...
 
+
+-- Take a list of task files and compile them to the given path (must end with /)
+compileFiles :: [String] -> String -> IO ()
+compileFiles files path = do
+  ts <- makeALGFromFiles files
+  case ts of
+    Left err -> putStrLn $ "Error: " ++ err
+    Right tasks ->
+      let res = CG.makeTaskFiles tasks
+      in do
+        mapM (\(filename, content) -> writeFile (path ++ filename) content) res
+        return ()
+  
 
 showCyclesFromTaskFiles :: [String] -> IO (Either String String)
 showCyclesFromTaskFiles files =
