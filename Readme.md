@@ -40,6 +40,21 @@ The preferred way of specifying a message type is: `msg_name(ParameterType1, Par
 ### Message type class format
 - Each parameter is named `pN` where N is the number of the parameter
 
+## Making the compiler project
+### Prerequisites
+- ghc (8.6.2)
+  - runhaskell
+- HUnit (1.6)
+### Makefile
+The makefile has the following targets:
+
+- `ltest`: run lexer tests
+- `ptest`: run parser tests
+- `atest`: run analysis tests
+- `ctest`: run code generator tests
+- `algtest`: run blackbox tests with algorithms from files
+- `test` : run all tests
+- `mtest`: run "manual tests" command line tool
 
 ## Unit Test instructions (German)
 

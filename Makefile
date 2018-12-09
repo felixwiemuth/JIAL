@@ -25,9 +25,12 @@ ltest: LexerTest.hs
 ptest: ParserTest.hs
 	runhaskell ParserTest
 
-test: LexerTest.hs ParserTest.hs
+test: LexerTest.hs ParserTest.hs AnalysisTest.hs AlgTest.hs CodeGeneratorTest.hs
 	runhaskell LexerTest
 	runhaskell ParserTest
+	runhaskell AnalysisTest
+	runhaskell AlgTest
+	runhaskell CodeGeneratorTest
 
 mtest: MTest.hs Lexer.hs Parser.hs MsgTypeLexer.hs
 	runhaskell MTest
