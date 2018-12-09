@@ -90,16 +90,30 @@ tfMsgSetDest = indent3 ++ "m_.setDest("
 tfMsgEnd = indent3 ++ "send(m_);\n" ++ indent2 ++ "}\n"
 tfReplyDestCode = "$src"
 
+tfPrepareStart = indent ++ "public void prepare() {\n"
+  ++ indent2 ++ "super.prepare();\n"
+tfPrepareGetGroup = "getGroup"
+tfPrepareAddIAP = "addIAP"
+
+
+-- Generates Java class files from a list of Tasks (each will have destination ID sets for all tasks given)
+-- Returns: [(filename, content)]
+makeTaskFiles :: [Task] -> [(String,String)]
+makeTaskFiles tasks =
+  let taskNames = map name tasks
+  in map (makeTaskFile taskNames) tasks
+
 -- Generates a Java class file from a Task
 -- taskNames: names of the tasks for which destination ID sets should be generated
-makeTaskFile :: Task -> [String] -> (String, String)
-makeTaskFile t taskNames = ((name t) ++ ".java",
+makeTaskFile :: [String] -> Task -> (String, String)
+makeTaskFile taskNames t = ((name t) ++ ".java",
   (prelude t)
   ++ importSet
   ++ importTask
   ++ importMsg
   ++ tfClassBegin ++ (name t) ++ " extends Task {\n"
-  ++ concat (map (\name -> tfDestVar ++ name ++ ";\n") taskNames)
+  ++ concat (map (\name -> tfDestVar ++ name ++ ";\n") taskNames) ++ "\n"
+  ++ generatePrepareMethod taskNames (getInputMsgTypesFromTask t)
   ++ concat (map generateTaskElement (elements t))
   ++ "\n}"
   )
@@ -150,6 +164,28 @@ generateSend msgType paramCode destCode =
 
 makeParamList :: [(String, String)] -> String
 makeParamList ps = "(" ++ intercalate ", " (map (\(t,v) -> t ++ " " ++ v) ps)  ++ ")"
+
+generatePrepareMethod :: [String] -> [String] -> String
+generatePrepareMethod taskNames msgTypes =
+  tfPrepareStart
+  ++ concat (map makeDestVarInit taskNames)
+  ++ concat (map makeAddIAP msgTypes)
+  ++ indent2 ++ "}\n"
+
+makeDestVarInit :: String -> String
+makeDestVarInit name = indent2 ++ "$" ++ name ++ " = " ++ tfPrepareGetGroup ++ "(\"" ++ name ++ "\");\n"
+
+makeAddIAP :: String -> String
+makeAddIAP msgType = indent2 ++ tfPrepareAddIAP ++ "(M." ++ msgType ++ ".class, m -> " ++ msgType ++ tfGuardMName ++ "(m), m -> " ++ msgType ++ tfActionMName ++ "(m));\n"
+
+getInputMsgTypesFromTask :: Task -> [String]
+getInputMsgTypesFromTask t = catMaybes $ map getInputMsgTypeFromTaskElement (elements t)
+
+getInputMsgTypeFromTaskElement :: TaskElem -> Maybe String
+getInputMsgTypeFromTaskElement e =
+  case e of
+    IAP inp elems -> Just $ msgT inp
+    _ -> Nothing
 
 -------------------------------------------------
 -- Extract all message types from a list of tasks
