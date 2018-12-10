@@ -22,11 +22,16 @@ msgtype4(String, MyClassA, MyClassB)
 ...
 ```
 
+### Compiling an algorithm
 
+### Simulating an algorithm
+- Add the compiled sources to a project which has the classes of the runtime system in class path
+- Create an object of class `Simulator`
+- Add tasks to the simulator with `Simulator.addTasks(...)`
+- Start the simulator with `Simulator.run()`
 
 
 ## Technical Documentation
-
 
 ### Message type file format
 The exact format parsed is:
