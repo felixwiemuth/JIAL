@@ -176,7 +176,12 @@ makeDestVarInit :: String -> String
 makeDestVarInit name = indent2 ++ "$" ++ name ++ " = " ++ tfPrepareGetGroup ++ "(\"" ++ name ++ "\");\n"
 
 makeAddIAP :: String -> String
-makeAddIAP msgType = indent2 ++ tfPrepareAddIAP ++ "(M." ++ msgType ++ ".class, m -> " ++ msgType ++ tfGuardMName ++ "(m), m -> " ++ msgType ++ tfActionMName ++ "(m));\n"
+makeAddIAP msgType =
+  let messageClass =
+        case msgType of
+          "init" -> "Message"
+          _ -> "M"
+  in indent2 ++ tfPrepareAddIAP ++ "(" ++ messageClass ++ "." ++ msgType ++ ".class, m -> " ++ msgType ++ tfGuardMName ++ "(m), m -> " ++ msgType ++ tfActionMName ++ "(m));\n"
 
 getInputMsgTypesFromTask :: Task -> [String]
 getInputMsgTypesFromTask t = catMaybes $ map getInputMsgTypeFromTaskElement (elements t)

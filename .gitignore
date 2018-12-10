@@ -25,3 +25,4 @@ MsgTypeLexer.hs
 Main
 Parser.hs
 /RuntimeSystem/nbproject/private/
+/RuntimeSystem/build/

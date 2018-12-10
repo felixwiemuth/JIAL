@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 import java.util.ArrayList;
 
 public class Task {
-    
+
     // Check where this is set
     protected int $ID;
     protected Set<Integer> $ALL;
@@ -26,7 +26,7 @@ public class Task {
             this.guard = guard;
             this.action = action;
         }
-        
+
         Class<? extends Message> msgType;
         Predicate<Message> guard;
         Consumer<Message> action; // TODO need no return type
@@ -42,30 +42,36 @@ public class Task {
 //        this.communicationModule = communicationModule;
 //        $ID = communicationModule.getNewID();
 //    }
-
     public void setCommunicationModule(CommunicationModule communicationModule) {
         this.communicationModule = communicationModule;
     }
-    
+
     /**
-     * Prepare the task for initialization.
+     * Register the task with the communication module.
+     */
+    public void register() {
+        $ID = communicationModule.register(this);
+    }
+
+    /**
+     * Prepare the task for initialization. Must be called after
+     * {@link #register()}.
      */
     public void prepare() {
-        $ID = communicationModule.getNewID();
         $ALL = communicationModule.getIDs();
     }
-    
+
     protected void addIAP(InputActionPair iap) {
         if (!iaps.containsKey(iap.msgType)) {
             iaps.put(iap.msgType, new ArrayList<>());
         }
         iaps.get(iap.msgType).add(iap);
     }
-    
+
     protected void addIAP(Class<? extends Message> msgType, Predicate<Message> guard, Consumer<Message> action) {
         addIAP(new InputActionPair(msgType, guard, action));
     }
-    
+
     protected Set<Integer> getGroup(String name) {
         return communicationModule.getGroup(name);
     }
@@ -87,7 +93,7 @@ public class Task {
         for (Message m : inputBuffer) {
             List<InputActionPair> iapsForMsgType = iaps.get(m.getClass());
             if (iapsForMsgType == null) {
-                return false;
+                continue;
             }
             for (InputActionPair iap : iapsForMsgType) {
                 if (iap.guard.test(m)) {
@@ -98,6 +104,10 @@ public class Task {
             }
         }
         return false;
+    }
+    
+    public int getID() {
+        return $ID;
     }
 
     protected void send(Message m) {
