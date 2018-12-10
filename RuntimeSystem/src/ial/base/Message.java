@@ -10,6 +10,11 @@ public class Message {
      * algorithm.
      */
     public static class init extends Message {
+
+        public init() {
+            this.setSrc(-1);
+        }
+        
     };
 
     private int src;

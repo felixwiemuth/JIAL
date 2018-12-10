@@ -10,9 +10,12 @@ import java.util.function.Predicate;
 
 import java.util.ArrayList;
 
+/**
+ *
+ * @author Felix Wiemuth
+ */
 public class Task {
 
-    // Check where this is set
     protected int $ID;
     protected Set<Integer> $ALL;
 
@@ -34,14 +37,9 @@ public class Task {
     }
 
     private CommunicationModule communicationModule;
-    private Set<Message> inputBuffer = new HashSet<Message>();
-    protected Map<Class<? extends Message>, List<InputActionPair>> iaps = new HashMap<>(); // TODO IAP = guard + action
+    private final Set<Message> inputBuffer = new HashSet<>();
+    protected Map<Class<? extends Message>, List<InputActionPair>> iaps = new HashMap<>();
 
-    //TODO maybe don't do this in constructor but via an initialization method
-//    public Task(CommunicationModule communicationModule) {
-//        this.communicationModule = communicationModule;
-//        $ID = communicationModule.getNewID();
-//    }
     public void setCommunicationModule(CommunicationModule communicationModule) {
         this.communicationModule = communicationModule;
     }
@@ -97,6 +95,11 @@ public class Task {
             }
             for (InputActionPair iap : iapsForMsgType) {
                 if (iap.guard.test(m)) {
+                    String s = getClass().getSimpleName() + "(" + getID() + ") processes " + m.getClass().getSimpleName();
+                    if (m.getSrc() >= 0) {
+                        s += " from " + m.getSrc();
+                    }
+                    System.out.println(s);
                     inputBuffer.remove(m);
                     iap.action.accept(m);
                     return true;
@@ -105,7 +108,7 @@ public class Task {
         }
         return false;
     }
-    
+
     public int getID() {
         return $ID;
     }

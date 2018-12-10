@@ -37,12 +37,10 @@ public class Simulator {
             run = false;
             for (Task task : tasks) {
                 if (task.step()) {
-                    System.out.println("Task " + task.getID() + " stepped.");
                     run = true;
                 }
             }
         }
         
     }
-    
 }

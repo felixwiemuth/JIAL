@@ -13,13 +13,15 @@ import java.util.Set;
  * @author Felix Wiemuth
  */
 public class LocalCommunicationModule implements CommunicationModule {
+
     private int nextID = 0;
-    private Map<Integer, Task> tasks = new HashMap<>();
-    private Map<String, Set<Integer>> groups = new HashMap<>();
-    
+    private final Map<Integer, Task> tasks = new HashMap<>();
+    private final Map<String, Set<Integer>> groups = new HashMap<>();
+
+    @Override
     public int register(Task task) {
         int id = nextID;
-        nextID ++;
+        nextID++;
         tasks.put(id, task);
         String name = task.getClass().getSimpleName();
         if (groups.get(name) == null) {
@@ -31,9 +33,10 @@ public class LocalCommunicationModule implements CommunicationModule {
 
     @Override
     public void sendMessage(Message m) {
-        for (Integer dest : m.getDest()) {
+        m.getDest().forEach((dest) -> {
             tasks.get(dest).addMessage(m);
-        }
+        });
+        System.out.println(m.getSrc() + " sends " + m.getClass().getSimpleName() + " to " + m.getDest().toString());
     }
 
     @Override
@@ -45,5 +48,5 @@ public class LocalCommunicationModule implements CommunicationModule {
     public Set<Integer> getIDs() {
         return tasks.keySet();
     }
-    
+
 }

@@ -7,10 +7,8 @@ import ial.base.Task;
 
 public class RuntimeSystem {
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
+        // Test the simulator with the two-phase commit protocol
         Simulator sim = new Simulator();
         Task c = new Coordinator();
         Task p1 = new Participant();
