@@ -1,0 +1,8 @@
+package example;
+
+import example.data.Vote;
+
+abort()
+commit()
+vote_request()
+vote(Vote) // uses the imported type "Vote"
