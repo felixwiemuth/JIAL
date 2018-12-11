@@ -32,7 +32,7 @@ rt name configs =
 -- 3nd parameter: list of expected cycles (format: "taskA.inputx, taskB.inputy(x==4)" where in parentheses the exact when-clause follows (excluding preceding and trailing whitespace))
 ct :: String -> [String] -> [String] -> IO Test
 ct name files expectedCycles =
-  do tasks <- makeALGFromFiles (map ("alg/"++) files) -- in IO monad
+  do tasks <- makeALGFromFiles (map (\f -> "alg/"++f++".jial") files) -- in IO monad
      return $ case tasks of
        Left err -> TestCase $ assertEqual "Parsing" True False -- NOTE: will not occur as long as program crashes when parse errors occur
        Right ts -> st name ts expectedCycles
