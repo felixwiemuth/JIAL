@@ -1,16 +1,21 @@
-task P {
-  boolean canCommit = true;
-  boolean committed = false;
+package example;
 
-  input vote_request() {
-    reply vote(canCommit);
-  }
+import example.data.Vote;
+import example.data.Transaction;
 
-  input commit() {
-    committed = true;
-  }
-  
-  input abort() {
-    committed = false;
-  }
+task Participant {
+    private Transaction t = new Transaction();
+    private Vote v = Vote.COMMIT;
+
+    input vote_request() {
+        reply vote(v);
+    }
+
+    input abort() {
+        t.abort();
+    }
+
+    input commit() {
+        t.commit();
+    }
 }

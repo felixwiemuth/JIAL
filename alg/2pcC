@@ -1,22 +1,32 @@
-task C {
-  int votes = 0;
-  int n = $P.size();
-  boolean result = false;
+package example;
 
-  input init() {
-    send vote_request() to $P;
-  }
+import example.data.Vote;
+import example.data.Transaction;
 
-  input vote(boolean commit) {
-    if (!commit) {
-      send abort() to $P;
-      result = false;
-    } else {
-      vote++;
-      if (votes == n) {
-        send commit() to $P;
-        result = true;
-      }
+task Coordinator {
+    private Transaction t = new Transaction();
+    private Vote v = Vote.COMMIT;
+    private int count = 0;
+
+    input init() {
+        if (v == Vote.ABORT) {
+            send abort() to $Participant;
+            t.abort();
+        } else {
+            send vote_request() to $Participant;
+        }
     }
-  }
+
+    input vote(Vote x) {
+        if (x == Vote.ABORT) {
+            send abort() to $Participant;
+            t.abort();
+        } else {
+            count++;
+            if (count == $Participant.size()) {
+                send commit() to $Participant;
+                t.commit();
+            }
+        }
+    }
 }
