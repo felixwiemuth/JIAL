@@ -1,5 +1,5 @@
 task A {
   input a() {
-    send b() to ALL;
+    send b() to $ALL;
   }
 }
