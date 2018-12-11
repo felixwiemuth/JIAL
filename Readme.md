@@ -86,8 +86,9 @@ The preferred way of specifying a message type is: `msg_name(ParameterType1, Par
 ## Making the compiler project
 ### Prerequisites
 - ghc (8.6.2)
-  - runhaskell
-- HUnit (1.6)
+  - runhaskell (for tests)
+- HUnit (1.6) (for tests)
+
 ### Makefile
 The makefile has the following targets:
 
@@ -108,7 +109,7 @@ In diesem Test sollen Außenstehende einfache, selbstgewählte Algorithmen in de
 Die Algorithmen werden in Textdateien mit der vorgegebenen Syntax definiert und dann in das bereitgestellte Haskell-Testframework eingetragen.
 
 ### Vorkenntnisse
-Ein grundlegendes Verständnis der Input/Action-Sprache sollte vorhanden sein. Eine Einführung findet sich in den Abschnitten 3.1 und 3.2(.0), Beispiele 3.2.2 der Arbeit.
+Ein grundlegendes Verständnis der Input/Action-Sprache sollte vorhanden sein. Eine Einführung findet sich in den Abschnitten 3.1 und 3.2(.0), Beispiele in 3.2.2 der Arbeit.
 Wenn du auch die Terminierungsanalyse testen willst, genügt es evtl., Abschnitt 3.3.6.1 "The message type graph" zu lesen - das Terminierungskriterium lautet: Ist dieser Graph azyklisch, terminiert der Algorithmus. Getestet werden soll, ob die implementierte Analyse die vorhandenen Kreise richtig erkennt.
 
 ### Syntax
