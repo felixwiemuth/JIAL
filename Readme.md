@@ -1,5 +1,11 @@
 # JIAL compiler
 
+## Project contents
+This project consists of:
+- The JIAL compiler (Haskell project with makefile)
+- The IAL runtime system (Netbeans Java project)
+- An example (the two-phase commit protocol)
+
 ## Short instructions
 
 ### Implementing an algorithm
@@ -20,6 +26,29 @@ msgtype2(int)
 msgtype3(MyClassA, int)
 msgtype4(String, MyClassA, MyClassB)
 ...
+```
+
+#### Define tasks
+For each task T, create a file `T.jial` of the following form: 
+
+
+```
+package example;
+
+import ...
+
+task T {
+    private int i = 0;
+    ...
+
+    input init() {
+      ...
+    }
+
+    input m(int k) {
+      ...
+    }
+}
 ```
 
 ### Compiling an algorithm
