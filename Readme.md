@@ -2,7 +2,9 @@
 
 ## Project contents
 This project consists of:
-- The JIAL compiler (Haskell project with makefile)
+- The JIAL compiler (Haskell project with makefile) (binaries for Linux x86-64 included)
+  - `jialc` is the JIAL compiler
+  - `jialt` is the termination analysis tool
 - The IAL runtime system (Netbeans Java project)
 - An example (the two-phase commit protocol)
 
@@ -52,6 +54,7 @@ task T {
 ```
 
 ### Compiling an algorithm
+Run `jialc msg_type_file task_file1 task_file2 ...`. This creates the java classes in the current working directory.
 
 ### Simulating an algorithm
 - Add the compiled sources to a project which has the classes of the runtime system in class path
@@ -59,6 +62,12 @@ task T {
 - Add tasks to the simulator with `Simulator.addTasks(...)`
 - Start the simulator with `Simulator.run()`
 
+### Running the termination analysis
+Run the `jialt` tool on the task files:
+
+`jialt task_file1 task_file2 ...`
+
+It outputs the cycles of the message type graph.
 
 ## Technical Documentation
 
@@ -82,6 +91,8 @@ The preferred way of specifying a message type is: `msg_name(ParameterType1, Par
 ### Makefile
 The makefile has the following targets:
 
+- `jialc`: make the JIAL compiler
+- `jialt`: make the JIAL termination analysis tool
 - `ltest`: run lexer tests
 - `ptest`: run parser tests
 - `atest`: run analysis tests
