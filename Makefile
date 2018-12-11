@@ -6,6 +6,10 @@ jialc: JIALC.hs
 jialt: JIALT.hs
 	$(cmd) -o jialt JIALT.hs
 
+JIALC.hs: Lexer.hs Parser.hs MsgTypeLexer.hs
+
+JIALT.hs: Lexer.hs Parser.hs MsgTypeLexer.hs
+
 lexer: Lexer.hs
 	$(cmd) Lexer.hs
 
