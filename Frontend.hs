@@ -3,6 +3,7 @@ module Frontend where
 import Data.Either
 
 import qualified Lexer as Lexer
+import qualified MsgTypeLexer as MsgTypeLexer
 import Parser
 import Analysis
 import qualified CodeGenerator as CG
@@ -28,7 +29,23 @@ compileFiles files path = do
       in do
         mapM (\(filename, content) -> writeFile (path ++ filename) content) res
         return ()
-  
+-- Take a message type file and compile it to the Java message type class M.java
+compileMsgTypeFile :: String -> String -> IO ()
+compileMsgTypeFile inFile path = do
+  f <- readFile inFile
+  let tokens = MsgTypeLexer.scanner f
+  case tokens of
+    Left err -> putStrLn err
+    Right ts -> writeFile (path ++ "M.java") $ CG.makeMsgTypeFile ts
+  return ()
+
+compileMsgTypeFileAndTasks :: [String] -> String -> IO ()
+compileMsgTypeFileAndTasks files path =
+  let msgTypeFile = head files
+      taskFiles = tail files
+  in do
+    compileMsgTypeFile msgTypeFile path
+    compileFiles taskFiles path
 
 showCyclesFromTaskFiles :: [String] -> IO (Either String String)
 showCyclesFromTaskFiles files =

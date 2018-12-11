@@ -1,7 +1,10 @@
 cmd := ghc -dynamic
 
-main: Lexer.hs Parser.hs
-	$(cmd) Main.hs
+jialc: JIALC.hs
+	$(cmd) -o jialc JIALC.hs
+
+jialt: JIALT.hs
+	$(cmd) -o jialt JIALT.hs
 
 lexer: Lexer.hs
 	$(cmd) Lexer.hs
