@@ -5,7 +5,7 @@ This project consists of:
 - The JIAL compiler (Haskell project with makefile) (binaries for Linux x86-64 included)
   - `jialc` is the JIAL compiler
   - `jialt` is the termination analysis tool
-- The IAL runtime system (Netbeans Java project)
+- The JIAL runtime system (Netbeans Java project)
 - An example (the two-phase commit protocol)
 
 ## Short instructions
