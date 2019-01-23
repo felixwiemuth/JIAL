@@ -30,6 +30,8 @@ msgtype4(String, MyClassA, MyClassB)
 ...
 ```
 
+The special `init()` message type is already defined and does not have to be specified.
+
 #### Define tasks
 For each task T, create a file `T.jial` of the following form: 
 
@@ -60,7 +62,7 @@ Run `jialc msg_type_file task_file1 task_file2 ...`. This creates the java class
 - Add the compiled sources to a project which has the classes of the runtime system in class path
 - Create an object of class `Simulator`
 - Add tasks to the simulator with `Simulator.addTasks(...)`
-- Start the simulator with `Simulator.run()`
+- Start the simulator with `Simulator.run()` (this adds an `init()` message to each task and begins executing eligible actions at tasks)
 
 ### Running the termination analysis
 Run the `jialt` tool on the task files:
