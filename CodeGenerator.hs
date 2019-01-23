@@ -15,7 +15,7 @@ importMsg = "import " ++ libPkg ++ "Message;\n"
 importTask = "import " ++ libPkg ++ "Task;\n"
 importSet = "import java.util.Set;\n"
 
-mtfBegin = "public class M {"
+mtfBegin = "import ial.base.Message;\n\npublic class M {"
 mtfEnd = "\n}"
 mtfClassBegin1 = "\n\n    public static class "
 mtfClassBegin2 = " extends Message {"
