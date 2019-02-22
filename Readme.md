@@ -1,8 +1,10 @@
 # JIAL compiler
+A compiler and static termination analysis for the *Java input-action language* developed in my Master's thesis.
+The language allows the event-driven formulation of distributed algorithms based on guarded commands by Dijkstra.
 
 ## Project contents
 This project consists of:
-- The JIAL compiler (Haskell project with makefile) (binaries for Linux x86-64 included)
+- The JIAL compiler (Haskell project with makefile)
   - `jialc` is the JIAL compiler
   - `jialt` is the termination analysis tool
 - The JIAL runtime system (Netbeans Java project)
