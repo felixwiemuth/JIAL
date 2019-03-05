@@ -36,7 +36,8 @@ public class LocalCommunicationModule implements CommunicationModule {
         m.getDest().forEach((dest) -> {
             tasks.get(dest).addMessage(m);
         });
-        System.out.println(m.getSrc() + " sends " + m.getClass().getSimpleName() + " to " + m.getDest().toString());
+        Task srcTask = tasks.get(m.getSrc());
+        System.out.println(srcTask.getClass().getSimpleName() + "(" + m.getSrc() + ") sends " + m.getClass().getSimpleName() + " to " + m.getDest().toString());
     }
 
     @Override
