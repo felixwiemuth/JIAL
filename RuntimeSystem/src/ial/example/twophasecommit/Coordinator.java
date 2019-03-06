@@ -1,7 +1,7 @@
-package example;
+package ial.example.twophasecommit;
 
-import example.data.Vote;
-import example.data.Transaction;
+import ial.example.twophasecommit.Vote;
+import ial.example.twophasecommit.Transaction;
 
 import java.util.Set;
 import ial.base.Task;

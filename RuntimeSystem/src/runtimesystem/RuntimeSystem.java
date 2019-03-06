@@ -1,7 +1,7 @@
 package runtimesystem;
 
-import example.Coordinator;
-import example.Participant;
+import ial.example.twophasecommit.Coordinator;
+import ial.example.twophasecommit.Participant;
 import ial.simulation.Simulator;
 import ial.base.Task;
 

@@ -1,7 +1,7 @@
-package example;
+package ial.example.twophasecommit;
 
 import ial.base.Message;
-import example.data.Vote;
+import ial.example.twophasecommit.Vote;
 
 public class M {
     public static class init extends Message {}

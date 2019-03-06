@@ -1,4 +1,4 @@
-package example.data;
+package ial.example.twophasecommit;
 
 /**
  *
