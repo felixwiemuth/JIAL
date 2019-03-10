@@ -11,8 +11,12 @@ import java.util.List;
  * @author Felix Wiemuth
  */
 public class Simulator {
-    private final CommunicationModule com = new LocalCommunicationModule();
-    private final List<Task> tasks = new ArrayList<>();
+    protected CommunicationModule com;
+    protected final List<Task> tasks = new ArrayList<>();
+
+    public Simulator() {
+        com = new LocalCommunicationModule();
+    }
     
     public void addTask(Task task) {
         tasks.add(task);
@@ -32,6 +36,10 @@ public class Simulator {
         tasks.forEach(Task::register);
         tasks.forEach(Task::prepare);
         tasks.forEach(t -> t.addMessage(new Message.init()));
+        runTasksUntilNoMoreActivity();
+    }
+    
+    protected void runTasksUntilNoMoreActivity() {
         boolean run = true;
         while (run) {
             run = false;
@@ -41,6 +49,5 @@ public class Simulator {
                 }
             }
         }
-        
     }
 }

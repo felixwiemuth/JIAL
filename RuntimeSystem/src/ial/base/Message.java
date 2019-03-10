@@ -14,7 +14,21 @@ public class Message {
         public init() {
             this.setSrc(-1);
         }
-        
+
+    };
+
+    /**
+     * The initial message to be sent to all tasks on initialization of an
+     * algorithm.
+     */
+    public static class tic extends Message {
+        public final int p1;
+
+        public tic(int round) {
+            this.setSrc(-1);
+            this.p1 = round;
+        }
+
     };
 
     private int src;

@@ -15,7 +15,7 @@ import java.util.Set;
 public class LocalCommunicationModule implements CommunicationModule {
 
     private int nextID = 0;
-    private final Map<Integer, Task> tasks = new HashMap<>();
+    protected final Map<Integer, Task> tasks = new HashMap<>();
     private final Map<String, Set<Integer>> groups = new HashMap<>();
 
     @Override
